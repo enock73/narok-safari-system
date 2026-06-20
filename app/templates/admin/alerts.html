@@ -1,0 +1,86 @@
+{% extends 'shared/base.html' %}
+{% block title %}Alerts{% endblock %}
+{% block page_title %}System Alerts{% endblock %}
+{% block content %}
+<div class="section-header mb-4">
+  <h1 class="section-title">System Alerts</h1>
+  <button class="btn btn-forest" data-bs-toggle="modal" data-bs-target="#createAlertModal">
+    <i class="bi bi-plus-circle me-2"></i>New Alert
+  </button>
+</div>
+
+<div class="row g-3">
+  {% for alert in alerts %}
+  <div class="col-12">
+    <div class="form-card d-flex align-items-start gap-3"
+         style="border-left:4px solid {% if alert.alert_type=='danger' %}#dc2626{% elif alert.alert_type=='warning' %}#d97706{% elif alert.alert_type=='success' %}#16a34a{% else %}#0ea5e9{% endif %};">
+      <div class="flex-grow-1">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="badge bg-{{ alert.alert_type }}-subtle text-{{ alert.alert_type }}">{{ alert.alert_type.upper() }}</span>
+          <span class="fw-semibold">{{ alert.title }}</span>
+          {% if not alert.is_active %}
+          <span class="badge bg-secondary-subtle text-secondary">Inactive</span>
+          {% endif %}
+        </div>
+        <p class="text-muted small mb-1">{{ alert.message }}</p>
+        <div class="text-muted" style="font-size:11px;">
+          Created by {{ alert.creator.full_name if alert.creator else 'System' }}
+          on {{ alert.created_at.strftime('%d %b %Y %H:%M') }}
+        </div>
+      </div>
+      <form method="POST" action="{{ url_for('admin.toggle_alert', alert_id=alert.id) }}">
+        <button type="submit" class="btn btn-sm btn-{{ 'warning' if alert.is_active else 'outline-success' }}">
+          {{ 'Deactivate' if alert.is_active else 'Activate' }}
+        </button>
+      </form>
+    </div>
+  </div>
+  {% else %}
+  <div class="col-12">
+    <div class="form-card text-center text-muted py-5">
+      <i class="bi bi-bell-slash display-5 d-block mb-3"></i>
+      No alerts created yet.
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Create Alert Modal -->
+<div class="modal fade" id="createAlertModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title"><i class="bi bi-bell-fill text-warning me-2"></i>Create Alert</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="{{ url_for('admin.alerts') }}">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Alert Type</label>
+            <select name="alert_type" class="form-select">
+              <option value="info">Info</option>
+              <option value="warning">Warning</option>
+              <option value="danger">Danger</option>
+              <option value="success">Success</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Title *</label>
+            <input type="text" name="title" class="form-control" required
+                   placeholder="e.g. Lion sighting near Talek Gate">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Message *</label>
+            <textarea name="message" class="form-control" rows="3" required
+                      placeholder="Full alert details for guides..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-forest">Publish Alert</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

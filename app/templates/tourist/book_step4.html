@@ -1,0 +1,265 @@
+{% extends 'shared/base.html' %}
+{% block title %}Book Safari — Payment{% endblock %}
+{% block page_title %}Book a Safari{% endblock %}
+
+{% block content %}
+<!-- Progress -->
+<div style="display:flex;align-items:center;gap:0;margin-bottom:28px;">
+  {% for i, label in [(1,'Guide'),(2,'Details'),(3,'Passengers'),(4,'Payment'),(5,'Confirm')] %}
+  <div style="text-align:center;">
+    <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;background:{% if i < 4 %}var(--forest-400){% elif i == 4 %}var(--forest-600){% else %}#e5e7eb{% endif %};color:{% if i <= 4 %}#fff{% else %}#9ca3af{% endif %};">
+      {% if i < 4 %}<i class="bi bi-check-lg"></i>{% else %}{{ i }}{% endif %}
+    </div>
+    <div style="font-size:10px;font-weight:600;color:#6b7280;margin-top:3px;">{{ label }}</div>
+  </div>
+  {% if not loop.last %}
+  <div style="flex:1;height:3px;background:{% if i < 4 %}var(--forest-400){% else %}#e5e7eb{% endif %};"></div>
+  {% endif %}
+  {% endfor %}
+</div>
+
+<div class="section-header mb-4">
+  <h1 class="section-title">Payment</h1>
+</div>
+
+<div class="row g-4">
+
+  <!-- Payment Form -->
+  <div class="col-lg-7">
+    <form method="POST" action="{{ url_for('tourist.book_payment') }}" id="payForm">
+
+      <!-- Payment Method -->
+      <div class="form-card mb-4">
+        <div class="form-section-title">Select Payment Method</div>
+        <div class="row g-3">
+
+          <!-- M-Pesa -->
+          <div class="col-md-4">
+            <label style="cursor:pointer;">
+              <input type="radio" name="payment_method" value="M-Pesa"
+                     id="mpesa" class="d-none" checked onchange="showMethod('mpesa')">
+              <div class="pay-method-card active" id="card_mpesa">
+                <div style="font-size:32px;margin-bottom:8px;">📱</div>
+                <div class="fw-semibold small">M-Pesa</div>
+                <div style="font-size:11px;color:#888;">Mobile Money</div>
+              </div>
+            </label>
+          </div>
+
+          <!-- Card -->
+          <div class="col-md-4">
+            <label style="cursor:pointer;">
+              <input type="radio" name="payment_method" value="Card"
+                     id="card" class="d-none" onchange="showMethod('card')">
+              <div class="pay-method-card" id="card_card">
+                <div style="font-size:32px;margin-bottom:8px;">💳</div>
+                <div class="fw-semibold small">Card</div>
+                <div style="font-size:11px;color:#888;">Visa / Mastercard</div>
+              </div>
+            </label>
+          </div>
+
+          <!-- Cash -->
+          <div class="col-md-4">
+            <label style="cursor:pointer;">
+              <input type="radio" name="payment_method" value="Cash"
+                     id="cash" class="d-none" onchange="showMethod('cash')">
+              <div class="pay-method-card" id="card_cash">
+                <div style="font-size:32px;margin-bottom:8px;">💵</div>
+                <div class="fw-semibold small">Cash at Gate</div>
+                <div style="font-size:11px;color:#888;">Pay on arrival</div>
+              </div>
+            </label>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- M-Pesa Details -->
+      <div class="form-card mb-4" id="mpesa_section">
+        <div class="form-section-title">M-Pesa Payment</div>
+        <div class="p-3 rounded-3 mb-3" style="background:#e8f5e9;border:1px solid #a5d6a7;">
+          <div class="fw-semibold small mb-2">
+            <i class="bi bi-phone-fill me-1" style="color:#2e7d32;"></i>
+            Pay via M-Pesa STK Push
+          </div>
+          <ol class="small mb-0" style="color:#1b5e20;padding-left:18px;">
+            <li class="mb-1">Go to M-Pesa on your phone</li>
+            <li class="mb-1">Select <strong>Lipa na M-Pesa → Pay Bill</strong></li>
+            <li class="mb-1">Business No: <strong>522522</strong></li>
+            <li class="mb-1">Account No: <strong>MARA{{ range(10000,99999)|random }}</strong></li>
+            <li class="mb-1">Amount: <strong>KES {{ '{:,.0f}'.format(fee) }}</strong></li>
+            <li>Enter your M-Pesa PIN and confirm</li>
+          </ol>
+        </div>
+        <label class="form-label">M-Pesa Transaction Code *</label>
+        <input type="text" name="mpesa_ref" class="form-control"
+               placeholder="e.g. QHX7Y3KPAB" id="mpesaRef"
+               style="text-transform:uppercase;font-family:monospace;letter-spacing:0.08em;">
+        <div class="form-text">Enter the M-Pesa confirmation code sent to your phone.</div>
+      </div>
+
+      <!-- Card Details -->
+      <div class="form-card mb-4 d-none" id="card_section">
+        <div class="form-section-title">Card Details</div>
+        <div class="p-3 rounded-3 mb-3" style="background:#e3f2fd;border:1px solid #90caf9;">
+          <i class="bi bi-shield-lock-fill me-1" style="color:#1565c0;"></i>
+          <span class="small" style="color:#1565c0;">Your card details are encrypted and secure.</span>
+        </div>
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Card Number</label>
+            <input type="text" class="form-control" placeholder="1234 5678 9012 3456"
+                   maxlength="19" oninput="formatCard(this)">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Expiry Date</label>
+            <input type="text" class="form-control" placeholder="MM/YY" maxlength="5">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">CVV</label>
+            <input type="text" class="form-control" placeholder="123" maxlength="4">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Name on Card</label>
+            <input type="text" class="form-control" placeholder="JOHN KIPCHOGE">
+          </div>
+        </div>
+      </div>
+
+      <!-- Cash at Gate -->
+      <div class="form-card mb-4 d-none" id="cash_section">
+        <div class="form-section-title">Pay Cash at Gate</div>
+        <div class="p-3 rounded-3" style="background:#fff8e1;border:1px solid #ffe082;">
+          <i class="bi bi-exclamation-triangle-fill me-1" style="color:#f57f17;"></i>
+          <span class="small" style="color:#f57f17;">
+            You will pay <strong>KES {{ '{:,.0f}'.format(fee) }}</strong> at the gate on arrival.
+            Your booking will remain <strong>PENDING</strong> until payment is confirmed by the gate officer.
+          </span>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-forest w-100 py-2" id="submitBtn">
+        <i class="bi bi-lock-fill me-2"></i>Confirm &amp; Submit Booking — KES {{ '{:,.0f}'.format(fee) }}
+      </button>
+      <a href="{{ url_for('tourist.book_passengers') }}" class="btn btn-outline-secondary w-100 mt-2">Back</a>
+
+    </form>
+  </div>
+
+  <!-- Order Summary -->
+  <div class="col-lg-5">
+    <div class="form-card mb-4" style="position:sticky;top:80px;">
+      <div class="form-section-title">Booking Summary</div>
+
+      <!-- Guide & Vehicle -->
+      <div class="d-flex align-items-center gap-3 mb-3 p-2 rounded-3 bg-forest-50">
+        <div style="font-size:28px;">🚙</div>
+        <div>
+          <div class="fw-semibold small">{{ guide.full_name }}</div>
+          <div class="text-muted" style="font-size:12px;">
+            {{ vehicle.plate_number }} · {{ vehicle.vehicle_type }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Trip Details -->
+      <table class="table table-sm small mb-3">
+        <tr><td class="text-muted">Gate</td><td class="fw-semibold">{{ booking.gate }}</td></tr>
+        <tr><td class="text-muted">Date</td><td class="fw-semibold">{{ booking.entry_date }}</td></tr>
+        <tr><td class="text-muted">Time</td><td class="fw-semibold">{{ booking.entry_time }}</td></tr>
+        <tr><td class="text-muted">Purpose</td><td class="fw-semibold">{{ booking.purpose }}</td></tr>
+        <tr><td class="text-muted">Adults</td><td class="fw-semibold">{{ booking.adult_count }}</td></tr>
+        <tr><td class="text-muted">Children</td><td class="fw-semibold">{{ booking.child_count }}</td></tr>
+      </table>
+
+      <!-- Fee Breakdown -->
+      <div class="form-section-title">Fee Breakdown</div>
+      <table class="table table-sm small mb-0">
+        {% if booking.citizen_count > 0 %}
+        <tr>
+          <td class="text-muted">KE Adults ({{ booking.citizen_count }} × KES 215)</td>
+          <td class="text-end">KES {{ '{:,.0f}'.format(booking.citizen_count * 215) }}</td>
+        </tr>
+        {% endif %}
+        {% if booking.non_citizen_count > 0 %}
+        <tr>
+          <td class="text-muted">Non-Citizens ({{ booking.non_citizen_count }} × KES 10,400)</td>
+          <td class="text-end">KES {{ '{:,.0f}'.format(booking.non_citizen_count * 10400) }}</td>
+        </tr>
+        {% endif %}
+        {% if booking.child_count > 0 %}
+        <tr>
+          <td class="text-muted">Children ({{ booking.child_count }} × KES 105)</td>
+          <td class="text-end">KES {{ '{:,.0f}'.format(booking.child_count * 105) }}</td>
+        </tr>
+        {% endif %}
+        <tr>
+          <td class="text-muted">Vehicle Fee</td>
+          <td class="text-end">KES 350</td>
+        </tr>
+        <tr style="border-top:2px solid var(--forest-300);">
+          <td class="fw-bold text-forest">TOTAL</td>
+          <td class="text-end fw-bold text-forest" style="font-size:16px;">
+            KES {{ '{:,.0f}'.format(fee) }}
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.pay-method-card {
+  border:2px solid var(--border-color);
+  border-radius:12px;
+  padding:16px;
+  text-align:center;
+  transition:all 0.2s;
+  background:#fff;
+  cursor:pointer;
+}
+.pay-method-card:hover { border-color:var(--forest-400); background:var(--forest-50); }
+.pay-method-card.active { border-color:var(--forest-600); background:var(--forest-50); }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showMethod(method) {
+  // Reset all cards
+  ['mpesa','card','cash'].forEach(m => {
+    document.getElementById('card_' + m).classList.remove('active');
+    document.getElementById(m + '_section').classList.add('d-none');
+  });
+  // Activate selected
+  document.getElementById('card_' + method).classList.add('active');
+  document.getElementById(method + '_section').classList.remove('d-none');
+
+  // Toggle required on mpesa ref
+  const mpesaRef = document.getElementById('mpesaRef');
+  if (mpesaRef) mpesaRef.required = (method === 'mpesa');
+}
+
+// Init
+showMethod('mpesa');
+
+// Card number formatter
+function formatCard(input) {
+  let v = input.value.replace(/\D/g,'').substring(0,16);
+  let parts = [];
+  for (let i = 0; i < v.length; i += 4) parts.push(v.substring(i,i+4));
+  input.value = parts.join(' ');
+}
+
+// Prevent double submit
+document.getElementById('payForm').addEventListener('submit', function() {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+});
+</script>
+{% endblock %}

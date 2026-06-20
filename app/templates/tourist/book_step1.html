@@ -1,0 +1,152 @@
+{% extends 'shared/base.html' %}
+{% block title %}Book Safari — Choose Guide & Vehicle{% endblock %}
+{% block page_title %}Book a Safari{% endblock %}
+
+{% block extra_css %}
+<style>
+.step-bar { display:flex; align-items:center; gap:0; margin-bottom:32px; }
+.step-dot {
+  width:36px; height:36px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:700; flex-shrink:0;
+}
+.step-dot.active   { background:var(--forest-600); color:#fff; }
+.step-dot.done     { background:var(--forest-400); color:#fff; }
+.step-dot.inactive { background:#e5e7eb; color:#9ca3af; }
+.step-line { flex:1; height:3px; background:#e5e7eb; }
+.step-line.done { background:var(--forest-400); }
+.step-label { font-size:11px; font-weight:600; color:#6b7280; margin-top:4px; text-align:center; }
+
+.guide-card {
+  background:#fff; border-radius:16px; border:1px solid var(--border-color);
+  padding:24px; transition:all 0.2s; cursor:pointer;
+  height:100%;
+}
+.guide-card:hover {
+  border-color:var(--forest-400);
+  box-shadow:0 8px 24px rgba(45,106,79,0.15);
+  transform:translateY(-2px);
+}
+.guide-avatar {
+  width:52px; height:52px; background:var(--forest-400);
+  border-radius:50%; display:flex; align-items:center;
+  justify-content:center; font-size:22px; font-weight:700;
+  color:var(--forest-800); flex-shrink:0;
+}
+.vehicle-select-card {
+  border:2px solid var(--border-color);
+  border-radius:10px; padding:12px 16px;
+  cursor:pointer; transition:all 0.2s; margin-bottom:8px;
+  display:flex; align-items:center; gap:12px;
+}
+.vehicle-select-card:hover { border-color:var(--forest-400); background:var(--forest-50); }
+.vehicle-select-card.selected { border-color:var(--forest-600); background:var(--forest-50); }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Progress Bar -->
+<div class="step-bar mb-4">
+  <div>
+    <div class="step-dot active">1</div>
+    <div class="step-label">Guide &amp; Vehicle</div>
+  </div>
+  <div class="step-line"></div>
+  <div>
+    <div class="step-dot inactive">2</div>
+    <div class="step-label">Trip Details</div>
+  </div>
+  <div class="step-line"></div>
+  <div>
+    <div class="step-dot inactive">3</div>
+    <div class="step-label">Passengers</div>
+  </div>
+  <div class="step-line"></div>
+  <div>
+    <div class="step-dot inactive">4</div>
+    <div class="step-label">Payment</div>
+  </div>
+  <div class="step-line"></div>
+  <div>
+    <div class="step-dot inactive">5</div>
+    <div class="step-label">Confirm</div>
+  </div>
+</div>
+
+<div class="section-header mb-4">
+  <h1 class="section-title">Choose Your Safari Guide &amp; Vehicle</h1>
+  <a href="/" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Back to Home
+  </a>
+</div>
+
+{% if guide_data %}
+<div class="row g-4">
+  {% for item in guide_data %}
+  <div class="col-md-6 col-lg-4">
+    <div class="guide-card">
+      <!-- Guide Info -->
+      <div class="d-flex align-items-start gap-3 mb-3">
+        <div class="guide-avatar">{{ item.guide.full_name[0].upper() }}</div>
+        <div class="flex-grow-1">
+          <div class="fw-semibold">{{ item.guide.full_name }}</div>
+          <div class="text-muted small">{{ item.guide.company or 'Independent Guide' }}</div>
+          <div class="small mt-1">
+            {% if item.guide.license_number %}
+            <span class="badge bg-success-subtle text-success">
+              <i class="bi bi-patch-check-fill me-1"></i>Licensed: {{ item.guide.license_number }}
+            </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Vehicles -->
+      <div class="form-section-title">Available Vehicles</div>
+      {% for v in item.vehicles %}
+      <div class="vehicle-select-card" onclick="selectVehicle({{ item.guide.id }}, {{ v.id }}, '{{ v.plate_number }}', '{{ v.vehicle_type }}', {{ v.capacity }})">
+        <div style="font-size:28px;">
+          {% if 'Cruiser' in v.vehicle_type or 'Rover' in v.vehicle_type %}🚙
+          {% elif 'Minivan' in v.vehicle_type %}🚐
+          {% elif 'Bus' in v.vehicle_type %}🚌
+          {% else %}🚗{% endif %}
+        </div>
+        <div class="flex-grow-1">
+          <div class="fw-semibold small">{{ v.plate_number }}</div>
+          <div class="text-muted" style="font-size:12px;">{{ v.vehicle_type }} · {{ v.capacity }} seats · {{ v.color or 'White' }}</div>
+        </div>
+        <i class="bi bi-arrow-right-circle text-muted"></i>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Hidden form to submit selection -->
+<form method="GET" action="{{ url_for('tourist.book_details') }}" id="selectionForm">
+  <input type="hidden" name="guide_id"   id="selectedGuide">
+  <input type="hidden" name="vehicle_id" id="selectedVehicle">
+</form>
+
+{% else %}
+<div class="form-card text-center py-5">
+  <i class="bi bi-truck-front display-4 text-muted d-block mb-3"></i>
+  <h5 class="text-muted">No Verified Guides Available</h5>
+  <p class="text-muted small">Guides need to be verified by admin before they appear here.</p>
+  <a href="{{ url_for('auth.login') }}" class="btn btn-forest mt-2">
+    Sign In as Admin to Verify Guides
+  </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function selectVehicle(guideId, vehicleId, plate, type, capacity) {
+  document.getElementById('selectedGuide').value   = guideId;
+  document.getElementById('selectedVehicle').value = vehicleId;
+  document.getElementById('selectionForm').submit();
+}
+</script>
+{% endblock %}

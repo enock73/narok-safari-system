@@ -1,0 +1,68 @@
+{% extends 'shared/base.html' %}
+{% block title %}My Profile{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+{% block content %}
+<div class="section-header">
+  <h1 class="section-title">My Profile</h1>
+</div>
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="form-card text-center">
+      <div style="width:80px;height:80px;background:var(--forest-400);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;color:var(--forest-800);margin:0 auto 16px;">
+        {{ current_user.full_name[0].upper() }}
+      </div>
+      <h5 class="mb-1">{{ current_user.full_name }}</h5>
+      <div class="text-muted small mb-2">{{ current_user.email }}</div>
+      <span class="badge bg-success text-uppercase">{{ current_user.role }}</span>
+      {% if current_user.is_verified %}
+      <div class="mt-2"><span class="badge bg-success-subtle text-success"><i class="bi bi-patch-check-fill me-1"></i>Verified</span></div>
+      {% else %}
+      <div class="mt-2"><span class="badge bg-warning-subtle text-warning"><i class="bi bi-clock me-1"></i>Pending Verification</span></div>
+      {% endif %}
+      <hr>
+      <div class="text-start small text-muted">
+        <div class="mb-1"><i class="bi bi-calendar3 me-2"></i>Joined {{ current_user.created_at.strftime('%d %b %Y') }}</div>
+        {% if current_user.last_login %}
+        <div><i class="bi bi-clock me-2"></i>Last login {{ current_user.last_login.strftime('%d %b %Y %H:%M') }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="form-card">
+      <div class="form-section-title">Update Profile</div>
+      <form method="POST">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Full Name</label>
+            <input type="text" class="form-control" name="full_name" value="{{ current_user.full_name }}" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" class="form-control" name="phone" value="{{ current_user.phone or '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Tour Company</label>
+            <input type="text" class="form-control" name="company" value="{{ current_user.company or '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Guide License Number</label>
+            <input type="text" class="form-control" name="license_number" value="{{ current_user.license_number or '' }}">
+          </div>
+          <div class="col-12"><hr></div>
+          <div class="col-12">
+            <div class="form-section-title">Change Password</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">New Password <span class="text-muted">(leave blank to keep current)</span></label>
+            <input type="password" class="form-control" name="new_password" placeholder="Min 8 characters">
+          </div>
+        </div>
+        <div class="mt-4">
+          <button type="submit" class="btn btn-forest"><i class="bi bi-check2 me-2"></i>Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

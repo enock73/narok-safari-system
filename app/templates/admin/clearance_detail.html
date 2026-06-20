@@ -1,0 +1,167 @@
+{% extends 'shared/base.html' %}
+{% block title %}Clearance Detail{% endblock %}
+{% block page_title %}Clearance Detail{% endblock %}
+{% block content %}
+<div class="section-header mb-4">
+  <div>
+    <h1 class="section-title">Clearance: <code class="text-forest">{{ clearance.token[:16] }}…</code></h1>
+    <div class="text-muted small mt-1">Submitted {{ clearance.created_at.strftime('%d %b %Y at %H:%M') }}</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('admin.clearances') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+    {% if clearance.qr_code_path %}
+    <a href="{{ url_for('static', filename='uploads/qrcodes/' + clearance.qr_code_path) }}" target="_blank"
+       class="btn btn-outline-forest btn-sm">
+      <i class="bi bi-qr-code me-1"></i>QR Code
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Left column: details -->
+  <div class="col-lg-8">
+    <div class="form-card mb-4">
+      <div class="form-section-title">Clearance Information</div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="small text-muted">Status</div>
+          <span class="status-badge status-{{ clearance.status }} mt-1 d-inline-block">{{ clearance.status.upper() }}</span>
+        </div>
+        <div class="col-md-6">
+          <div class="small text-muted">Gate</div>
+          <div class="fw-semibold">{{ clearance.gate }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="small text-muted">Entry Date</div>
+          <div class="fw-semibold">{{ clearance.entry_date }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="small text-muted">Entry Time</div>
+          <div class="fw-semibold">{{ clearance.entry_time or '—' }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="small text-muted">Purpose</div>
+          <div class="fw-semibold">{{ clearance.purpose }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="small text-muted">Fee Paid</div>
+          <div class="fw-semibold text-forest">KES {{ '{:,.0f}'.format(clearance.fee_paid or 0) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card mb-4">
+      <div class="form-section-title">Guide &amp; Vehicle</div>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="small text-muted">Guide Name</div>
+          <div class="fw-semibold">{{ clearance.guide.full_name }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="small text-muted">Company</div>
+          <div>{{ clearance.guide.company or '—' }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="small text-muted">Vehicle Plate</div>
+          <div><span class="badge bg-light text-dark border fs-6">{{ clearance.vehicle.plate_number }}</span></div>
+        </div>
+        <div class="col-md-6">
+          <div class="small text-muted">Vehicle Type</div>
+          <div>{{ clearance.vehicle.vehicle_type }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card mb-4">
+      <div class="form-section-title">Passenger Manifest ({{ passengers|length }} passengers)</div>
+      <div class="row mb-2 small text-muted">
+        <div class="col-4">Adults: <strong class="text-dark">{{ clearance.adult_count }}</strong></div>
+        <div class="col-4">Children: <strong class="text-dark">{{ clearance.child_count }}</strong></div>
+        <div class="col-4">Citizens: <strong class="text-dark">{{ clearance.citizen_count }}</strong></div>
+      </div>
+      {% if passengers %}
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr><th>#</th><th>Name</th><th>Nationality</th><th>ID/Passport</th><th>Age Group</th></tr>
+          </thead>
+          <tbody>
+            {% for p in passengers %}
+            <tr>
+              <td class="text-muted">{{ loop.index }}</td>
+              <td>{{ p.full_name }}</td>
+              <td>{{ p.nationality or '—' }}</td>
+              <td><code>{{ p.passport_id or '—' }}</code></td>
+              <td>{{ p.age_group.title() }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="text-muted small">No passenger manifest uploaded.</div>
+      {% endif %}
+    </div>
+
+    {% if clearance.notes %}
+    <div class="form-card mb-4">
+      <div class="form-section-title">Notes</div>
+      <p class="small mb-0">{{ clearance.notes }}</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Right column: QR + actions -->
+  <div class="col-lg-4">
+    {% if clearance.qr_code_path %}
+    <div class="qr-card mb-4">
+      <div class="fw-semibold mb-3">Gate Clearance Token</div>
+      <img src="{{ url_for('static', filename='uploads/qrcodes/' + clearance.qr_code_path) }}"
+           alt="QR Code" class="img-fluid rounded-3 mb-3" style="max-width:200px;">
+      <div class="qr-token mb-2">{{ clearance.token }}</div>
+      <div class="small text-muted">Scan to verify at gate</div>
+    </div>
+    {% endif %}
+
+    {% if clearance.status == 'pending' %}
+    <div class="form-card mb-4">
+      <div class="form-section-title text-success">Approve Clearance</div>
+      <p class="small text-muted mb-3">Calculated fee: <strong class="text-forest">KES {{ '{:,.0f}'.format(clearance.calculate_fee()) }}</strong></p>
+      <form method="POST" action="{{ url_for('admin.approve_clearance', clearance_id=clearance.id) }}">
+        <textarea name="notes" class="form-control form-control-sm mb-3" rows="2"
+                  placeholder="Optional approval notes..."></textarea>
+        <button type="submit" class="btn btn-success w-100"
+                onclick="return confirm('Approve this clearance?')">
+          <i class="bi bi-check-circle me-2"></i>Approve & Generate Fee
+        </button>
+      </form>
+    </div>
+
+    <div class="form-card">
+      <div class="form-section-title text-danger">Reject Clearance</div>
+      <form method="POST" action="{{ url_for('admin.reject_clearance', clearance_id=clearance.id) }}">
+        <textarea name="notes" class="form-control form-control-sm mb-3" rows="2"
+                  placeholder="Reason for rejection (required)" required></textarea>
+        <button type="submit" class="btn btn-danger w-100"
+                onclick="return confirm('Reject this clearance?')">
+          <i class="bi bi-x-circle me-2"></i>Reject
+        </button>
+      </form>
+    </div>
+    {% endif %}
+
+    {% if clearance.approved_at %}
+    <div class="form-card">
+      <div class="form-section-title">Approval Info</div>
+      <div class="small">
+        <div class="mb-1"><span class="text-muted">Approved by:</span> {{ clearance.approver.full_name if clearance.approver else '—' }}</div>
+        <div><span class="text-muted">At:</span> {{ clearance.approved_at.strftime('%d %b %Y %H:%M') if clearance.approved_at else '—' }}</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

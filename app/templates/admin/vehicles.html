@@ -1,0 +1,96 @@
+{% extends 'shared/base.html' %}
+{% block title %}Vehicle Density{% endblock %}
+{% block page_title %}Vehicle Density Monitor{% endblock %}
+{% block content %}
+<div class="section-header mb-4">
+  <h1 class="section-title">Vehicle Density Monitor</h1>
+  <div class="topbar-time small text-muted" id="liveTime"></div>
+</div>
+
+<!-- Gate density cards -->
+<div class="row g-3 mb-4">
+  {% for g in gate_density %}
+  <div class="col-sm-6 col-lg-4">
+    <div class="stat-card green">
+      <div class="stat-icon green"><i class="bi bi-geo-fill"></i></div>
+      <div class="stat-value">{{ g.count }}</div>
+      <div class="stat-label">{{ g.gate }}</div>
+      <div class="stat-trend text-muted small">vehicles today</div>
+    </div>
+  </div>
+  {% else %}
+  <div class="col-12 text-muted small">No vehicle data for today.</div>
+  {% endfor %}
+</div>
+
+<!-- Hourly Chart -->
+<div class="chart-card mb-4">
+  <div class="chart-card-header">
+    <div class="chart-card-title"><i class="bi bi-clock-history text-forest me-2"></i>Hourly Entries — Today</div>
+  </div>
+  <canvas id="hourlyChart" height="80"></canvas>
+</div>
+
+<!-- Vehicle Registry Table -->
+<div class="data-table-wrap">
+  <div class="data-table-header">
+    <div class="data-table-title">Registered Vehicles</div>
+    <span class="text-muted small">Total: {{ vehicles.total }}</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr><th>Plate</th><th>Type</th><th>Make/Model</th><th>Capacity</th><th>Owner (Guide)</th><th>Company</th><th>Insurance Expiry</th></tr>
+      </thead>
+      <tbody>
+        {% for v in vehicles.items %}
+        <tr>
+          <td><span class="badge bg-light text-dark border fw-bold">{{ v.plate_number }}</span></td>
+          <td class="small">{{ v.vehicle_type }}</td>
+          <td class="small">{{ v.make or '' }} {{ v.model or '' }}</td>
+          <td>{{ v.capacity }}</td>
+          <td class="small">{{ v.owner.full_name }}</td>
+          <td class="small">{{ v.owner.company or '—' }}</td>
+          <td class="small {% if v.insurance_expiry and v.insurance_expiry < today %}text-danger{% endif %}">
+            {{ v.insurance_expiry or '—' }}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-4">No vehicles registered.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const hourlyData = {{ hourly_data|safe }};
+const hours = Array.from({length:24}, (_,i) => `${String(i).padStart(2,'0')}:00`);
+const counts = Array(24).fill(0);
+hourlyData.forEach(d => { counts[d.hour] = d.count; });
+
+const ctx = document.getElementById('hourlyChart').getContext('2d');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: hours,
+    datasets: [{
+      label: 'Vehicles Entered',
+      data: counts,
+      backgroundColor: counts.map(c => c > 5 ? 'rgba(220,38,38,0.7)' : 'rgba(82,183,136,0.75)'),
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#f0faf2' }, ticks: { stepSize: 1 } },
+      x: { grid: { display: false }, ticks: { maxTicksLimit: 12 } }
+    }
+  }
+});
+</script>
+{% endblock %}

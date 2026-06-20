@@ -1,0 +1,91 @@
+{% extends 'shared/base.html' %}
+{% block title %}Wildlife Sightings{% endblock %}
+{% block page_title %}My Wildlife Sightings{% endblock %}
+{% block content %}
+<div class="section-header mb-4">
+  <h1 class="section-title">Wildlife Sightings</h1>
+  <a href="{{ url_for('guide.report_sighting') }}" class="btn btn-forest">
+    <i class="bi bi-plus-circle me-2"></i>Report Sighting
+  </a>
+</div>
+
+<div class="data-table-wrap">
+  <div class="data-table-header">
+    <div class="data-table-title">
+      My Reports <span class="badge bg-secondary ms-2">{{ sightings.total }}</span>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr><th>Species</th><th>Category</th><th>Count</th><th>Location</th><th>Behavior</th><th>Date/Time</th><th>Threat</th><th>Photos</th></tr>
+      </thead>
+      <tbody>
+        {% for s in sightings.items %}
+        <tr>
+          <td>
+            <div class="fw-semibold small">{{ s.common_name or s.species }}</div>
+            {% if s.common_name %}<div class="text-muted" style="font-size:11px;font-style:italic;">{{ s.species }}</div>{% endif %}
+          </td>
+          <td>
+            {% set cat_colors = {'Big Five':'warning','Predator':'danger','Plains Game':'success','Bird':'info','Primate':'secondary','Reptile':'dark'} %}
+            <span class="badge bg-{{ cat_colors.get(s.category, 'secondary') }}-subtle text-{{ cat_colors.get(s.category, 'secondary') }}">
+              {{ s.category }}
+            </span>
+          </td>
+          <td class="fw-semibold">{{ s.count }}</td>
+          <td class="small">
+            {{ s.location_name or '{:.4f}, {:.4f}'.format(s.latitude|float, s.longitude|float) }}
+          </td>
+          <td class="small">{{ s.behavior }}</td>
+          <td class="small text-muted">{{ s.sighted_at.strftime('%d %b %Y %H:%M') }}</td>
+          <td>
+            {% if s.threat_level != 'none' %}
+            <span class="badge bg-danger-subtle text-danger">{{ s.threat_level.upper() }}</span>
+            {% else %}<span class="text-muted">—</span>{% endif %}
+          </td>
+          <td>
+            {% set photo_count = s.photos.count() %}
+            {% if photo_count > 0 %}
+            <span class="badge bg-info-subtle text-info">
+              <i class="bi bi-camera-fill me-1"></i>{{ photo_count }}
+            </span>
+            {% else %}<span class="text-muted">—</span>{% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="8" class="text-center text-muted py-5">
+            <i class="bi bi-binoculars display-4 d-block mb-3"></i>
+            No sightings reported yet.
+            <a href="{{ url_for('guide.report_sighting') }}" class="d-block mt-2">Report your first sighting</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if sightings.pages > 1 %}
+  <div class="d-flex justify-content-center py-3">
+    <nav><ul class="pagination pagination-sm mb-0">
+      {% if sightings.has_prev %}
+      <li class="page-item"><a class="page-link" href="?page={{ sightings.prev_num }}">‹</a></li>
+      {% endif %}
+      {% for p in sightings.iter_pages() %}
+        {% if p %}
+        <li class="page-item {% if p == sightings.page %}active{% endif %}">
+          <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% endif %}
+      {% endfor %}
+      {% if sightings.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ sightings.next_num }}">›</a></li>
+      {% endif %}
+    </ul></nav>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

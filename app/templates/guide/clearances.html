@@ -1,0 +1,78 @@
+{% extends 'shared/base.html' %}
+{% block title %}My Clearances{% endblock %}
+{% block page_title %}My Gate Clearances{% endblock %}
+{% block content %}
+<div class="section-header mb-4">
+  <h1 class="section-title">Gate Clearances</h1>
+  <a href="{{ url_for('guide.request_clearance') }}" class="btn btn-forest">
+    <i class="bi bi-plus-circle me-2"></i>New Request
+  </a>
+</div>
+
+<div class="data-table-wrap">
+  <div class="data-table-header">
+    <div class="data-table-title">
+      My Clearances <span class="badge bg-secondary ms-2">{{ clearances.total }}</span>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr><th>Token</th><th>Gate</th><th>Vehicle</th><th>Date</th><th>Passengers</th><th>Purpose</th><th>Status</th><th>Fee</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for c in clearances.items %}
+        <tr>
+          <td><code class="text-forest small">{{ c.token[:10] }}…</code></td>
+          <td class="small">{{ c.gate }}</td>
+          <td><span class="badge bg-light text-dark border">{{ c.vehicle.plate_number }}</span></td>
+          <td class="small">{{ c.entry_date }}</td>
+          <td>{{ c.passenger_count }}</td>
+          <td class="small">{{ c.purpose }}</td>
+          <td><span class="status-badge status-{{ c.status }}">{{ c.status }}</span></td>
+          <td class="small">
+            {% if c.fee_paid %}KES {{ '{:,.0f}'.format(c.fee_paid) }}{% else %}—{% endif %}
+          </td>
+          <td>
+            <a href="{{ url_for('guide.clearance_detail', clearance_id=c.id) }}"
+               class="btn btn-sm btn-outline-forest py-0 px-2">
+              <i class="bi bi-eye me-1"></i>{% if c.status == 'approved' %}QR{% else %}View{% endif %}
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="9" class="text-center text-muted py-5">
+            <i class="bi bi-pass display-5 d-block mb-3"></i>
+            No clearances yet.
+            <a href="{{ url_for('guide.request_clearance') }}" class="d-block mt-2">Request your first clearance</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if clearances.pages > 1 %}
+  <div class="d-flex justify-content-center py-3">
+    <nav><ul class="pagination pagination-sm mb-0">
+      {% if clearances.has_prev %}
+      <li class="page-item"><a class="page-link" href="?page={{ clearances.prev_num }}">‹ Prev</a></li>
+      {% endif %}
+      {% for p in clearances.iter_pages() %}
+        {% if p %}
+        <li class="page-item {% if p == clearances.page %}active{% endif %}">
+          <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% endif %}
+      {% endfor %}
+      {% if clearances.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ clearances.next_num }}">Next ›</a></li>
+      {% endif %}
+    </ul></nav>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

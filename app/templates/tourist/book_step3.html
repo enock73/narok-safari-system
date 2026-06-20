@@ -1,0 +1,144 @@
+{% extends 'shared/base.html' %}
+{% block title %}Book Safari — Passengers{% endblock %}
+{% block page_title %}Book a Safari{% endblock %}
+
+{% block content %}
+<!-- Progress -->
+<div style="display:flex;align-items:center;gap:0;margin-bottom:28px;">
+  {% for i, label in [(1,'Guide'),(2,'Details'),(3,'Passengers'),(4,'Payment'),(5,'Confirm')] %}
+  <div style="text-align:center;">
+    <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;background:{% if i < 3 %}var(--forest-400){% elif i == 3 %}var(--forest-600){% else %}#e5e7eb{% endif %};color:{% if i <= 3 %}#fff{% else %}#9ca3af{% endif %};">
+      {% if i < 3 %}<i class="bi bi-check-lg"></i>{% else %}{{ i }}{% endif %}
+    </div>
+    <div style="font-size:10px;font-weight:600;color:#6b7280;margin-top:3px;">{{ label }}</div>
+  </div>
+  {% if not loop.last %}
+  <div style="flex:1;height:3px;background:{% if i < 3 %}var(--forest-400){% else %}#e5e7eb{% endif %};"></div>
+  {% endif %}
+  {% endfor %}
+</div>
+
+<div class="section-header mb-4">
+  <h1 class="section-title">Passenger Manifest</h1>
+  <span class="text-muted small">Total passengers: <strong>{{ total_pax }}</strong></span>
+</div>
+
+<form method="POST" action="{{ url_for('tourist.book_passengers') }}">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="form-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="form-section-title mb-0">Add Each Passenger</div>
+          <button type="button" class="btn btn-outline-forest btn-sm" onclick="addRow()">
+            <i class="bi bi-plus-circle me-1"></i>Add Passenger
+          </button>
+        </div>
+
+        <div id="passengerRows">
+          {% for i in range(total_pax) %}
+          <div class="passenger-row border rounded-3 p-3 mb-2" id="row_{{ i }}">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="small fw-semibold text-muted">Passenger {{ i + 1 }}</span>
+              {% if i > 0 %}
+              <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2"
+                      onclick="removeRow('row_{{ i }}')">
+                <i class="bi bi-trash3" style="font-size:12px;"></i>
+              </button>
+              {% endif %}
+            </div>
+            <div class="row g-2">
+              <div class="col-md-5">
+                <input type="text" name="name[]" class="form-control form-control-sm"
+                       placeholder="Full Name *" required>
+              </div>
+              <div class="col-md-3">
+                <input type="text" name="nationality[]" class="form-control form-control-sm"
+                       placeholder="Nationality">
+              </div>
+              <div class="col-md-2">
+                <input type="text" name="passport[]" class="form-control form-control-sm"
+                       placeholder="ID/Passport">
+              </div>
+              <div class="col-md-2">
+                <select name="age_group[]" class="form-select form-select-sm">
+                  <option value="adult">Adult</option>
+                  <option value="child">Child</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="mt-3 p-3 rounded-3 bg-forest-50" style="border:1px solid var(--forest-300);font-size:12px;">
+          <i class="bi bi-info-circle-fill text-forest me-1"></i>
+          Please ensure all passenger details match their official ID or passport documents.
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="form-card mb-4">
+        <div class="form-section-title">Booking Summary</div>
+        <div class="small">
+          <div class="mb-2"><i class="bi bi-geo-fill text-forest me-2"></i><strong>Gate:</strong> {{ booking.gate }}</div>
+          <div class="mb-2"><i class="bi bi-calendar3 text-forest me-2"></i><strong>Date:</strong> {{ booking.entry_date }}</div>
+          <div class="mb-2"><i class="bi bi-clock text-forest me-2"></i><strong>Time:</strong> {{ booking.entry_time }}</div>
+          <div class="mb-2"><i class="bi bi-people-fill text-forest me-2"></i><strong>Adults:</strong> {{ booking.adult_count }}</div>
+          <div class="mb-2"><i class="bi bi-person-fill text-forest me-2"></i><strong>Children:</strong> {{ booking.child_count }}</div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-forest w-100 py-2">
+        <i class="bi bi-arrow-right-circle me-2"></i>Next: Payment
+      </button>
+      <a href="{{ url_for('tourist.book_details') }}" class="btn btn-outline-secondary w-100 mt-2">Back</a>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let rowCount = {{ total_pax }};
+function addRow() {
+  rowCount++;
+  const div = document.createElement('div');
+  div.className = 'passenger-row border rounded-3 p-3 mb-2';
+  div.id = 'row_' + rowCount;
+  div.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span class="small fw-semibold text-muted">Passenger ${rowCount}</span>
+      <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2"
+              onclick="removeRow('row_${rowCount}')">
+        <i class="bi bi-trash3" style="font-size:12px;"></i>
+      </button>
+    </div>
+    <div class="row g-2">
+      <div class="col-md-5">
+        <input type="text" name="name[]" class="form-control form-control-sm"
+               placeholder="Full Name *" required>
+      </div>
+      <div class="col-md-3">
+        <input type="text" name="nationality[]" class="form-control form-control-sm"
+               placeholder="Nationality">
+      </div>
+      <div class="col-md-2">
+        <input type="text" name="passport[]" class="form-control form-control-sm"
+               placeholder="ID/Passport">
+      </div>
+      <div class="col-md-2">
+        <select name="age_group[]" class="form-select form-select-sm">
+          <option value="adult">Adult</option>
+          <option value="child">Child</option>
+        </select>
+      </div>
+    </div>
+  `;
+  document.getElementById('passengerRows').appendChild(div);
+}
+function removeRow(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+</script>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'shared/base.html' %}
+{% block title %}My Bookings{% endblock %}
+{% block page_title %}My Safari Bookings{% endblock %}
+
+{% block content %}
+<div class="section-header mb-4">
+  <h1 class="section-title">My Safari Bookings</h1>
+  <a href="{{ url_for('tourist.book') }}" class="btn btn-forest">
+    <i class="bi bi-plus-circle me-2"></i>Book New Safari
+  </a>
+</div>
+
+{% if clearances %}
+<div class="row g-4">
+  {% for c in clearances %}
+  <div class="col-md-6 col-lg-4">
+    <div class="form-card h-100">
+
+      <!-- Status Badge -->
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <span class="status-badge status-{{ c.status }}">
+          {% if c.status == 'approved' %}<i class="bi bi-check-circle-fill me-1"></i>
+          {% elif c.status == 'pending' %}<i class="bi bi-clock-fill me-1"></i>
+          {% elif c.status == 'rejected' %}<i class="bi bi-x-circle-fill me-1"></i>
+          {% else %}<i class="bi bi-dash-circle-fill me-1"></i>
+          {% endif %}
+          {{ c.status.upper() }}
+        </span>
+        <span class="text-muted small">{{ c.created_at.strftime('%d %b %Y') }}</span>
+      </div>
+
+      <!-- Gate & Date -->
+      <h6 class="fw-bold mb-1">{{ c.gate }}</h6>
+      <div class="text-muted small mb-3">
+        <i class="bi bi-calendar3 me-1"></i>{{ c.entry_date }}
+        &nbsp;·&nbsp;
+        <i class="bi bi-clock me-1"></i>{{ c.entry_time or '07:00' }}
+      </div>
+
+      <!-- Details -->
+      <div class="row g-2 small mb-3">
+        <div class="col-6">
+          <div class="text-muted">Guide</div>
+          <div class="fw-semibold">{{ c.guide.full_name }}</div>
+        </div>
+        <div class="col-6">
+          <div class="text-muted">Vehicle</div>
+          <div class="fw-semibold">{{ c.vehicle.plate_number }}</div>
+        </div>
+        <div class="col-6">
+          <div class="text-muted">Passengers</div>
+          <div class="fw-semibold">{{ c.passenger_count }}</div>
+        </div>
+        <div class="col-6">
+          <div class="text-muted">Fee Paid</div>
+          <div class="fw-semibold text-forest">
+            KES {{ '{:,.0f}'.format(c.fee_paid or 0) }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Token -->
+      <div class="qr-token mb-3" style="font-size:10px;">
+        {{ c.token[:20] }}...
+      </div>
+
+      <!-- Actions -->
+      <div class="d-flex gap-2">
+        {% if c.status == 'approved' and c.qr_code_path %}
+        <a href="{{ url_for('static', filename='uploads/qrcodes/' + c.qr_code_path) }}"
+           download class="btn btn-forest btn-sm flex-grow-1">
+          <i class="bi bi-qr-code me-1"></i>Download QR
+        </a>
+        {% elif c.status == 'pending' %}
+        <span class="btn btn-warning btn-sm flex-grow-1 disabled">
+          <i class="bi bi-clock me-1"></i>Awaiting Approval
+        </span>
+        {% elif c.status == 'rejected' %}
+        <a href="{{ url_for('tourist.book') }}" class="btn btn-outline-forest btn-sm flex-grow-1">
+          <i class="bi bi-arrow-repeat me-1"></i>Book Again
+        </a>
+        {% endif %}
+        <a href="{{ url_for('tourist.book_confirm', clearance_id=c.id) }}"
+           class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-eye"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="form-card text-center py-5">
+  <div style="font-size:52px;margin-bottom:16px;">🦁</div>
+  <h5 class="text-muted mb-2">No Bookings Yet</h5>
+  <p class="text-muted small mb-4">
+    You haven't made any safari bookings. Start your adventure today!
+  </p>
+  <a href="{{ url_for('tourist.book') }}" class="btn btn-forest">
+    <i class="bi bi-ticket-perforated-fill me-2"></i>Book Your First Safari
+  </a>
+</div>
+{% endif %}
+{% endblock %}

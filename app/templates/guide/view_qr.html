@@ -1,0 +1,75 @@
+{% extends 'shared/base.html' %}
+{% block title %}QR Clearance Token{% endblock %}
+{% block page_title %}Gate Clearance QR Token{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="qr-card mt-4" style="border:2px solid var(--forest-300);">
+      <!-- Header -->
+      <div class="text-center mb-4">
+        <div class="auth-logo-icon mx-auto mb-2"><i class="bi bi-tree-fill"></i></div>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;color:var(--forest-800);">
+          NAROK COUNTY GOVERNMENT
+        </div>
+        <div class="text-muted small">Maasai Mara National Reserve</div>
+        <div class="text-muted small">Gate Clearance Token</div>
+      </div>
+
+      <hr>
+
+      <!-- Details -->
+      <div class="row g-2 small text-center mb-3">
+        <div class="col-6">
+          <div class="text-muted">Gate</div>
+          <div class="fw-bold text-forest">{{ clearance.gate }}</div>
+        </div>
+        <div class="col-6">
+          <div class="text-muted">Status</div>
+          <span class="status-badge status-{{ clearance.status }}">{{ clearance.status.upper() }}</span>
+        </div>
+        <div class="col-6">
+          <div class="text-muted">Entry Date</div>
+          <div class="fw-semibold">{{ clearance.entry_date }}</div>
+        </div>
+        <div class="col-6">
+          <div class="text-muted">Passengers</div>
+          <div class="fw-semibold">{{ clearance.passenger_count }}</div>
+        </div>
+        <div class="col-6">
+          <div class="text-muted">Vehicle</div>
+          <div class="fw-semibold">{{ clearance.vehicle.plate_number }}</div>
+        </div>
+        <div class="col-6">
+          <div class="text-muted">Purpose</div>
+          <div class="fw-semibold">{{ clearance.purpose }}</div>
+        </div>
+      </div>
+
+      <hr>
+
+      <!-- QR Code -->
+      {% if clearance.qr_code_path %}
+      <div class="text-center mb-3">
+        <img src="{{ url_for('static', filename='uploads/qrcodes/' + clearance.qr_code_path) }}"
+             alt="QR Code" class="img-fluid" style="max-width:240px;border-radius:8px;">
+      </div>
+      <div class="qr-token mb-3 small">{{ clearance.token }}</div>
+      {% endif %}
+
+      <div class="d-flex gap-2">
+        {% if clearance.qr_code_path %}
+        <a href="{{ url_for('static', filename='uploads/qrcodes/' + clearance.qr_code_path) }}"
+           download="clearance_{{ clearance.token[:8] }}.png"
+           class="btn btn-forest flex-grow-1 btn-sm">
+          <i class="bi bi-download me-1"></i>Download
+        </a>
+        {% endif %}
+        <button onclick="window.print()" class="btn btn-outline-forest btn-sm flex-grow-1">
+          <i class="bi bi-printer me-1"></i>Print
+        </button>
+        <a href="{{ url_for('guide.clearances') }}" class="btn btn-outline-secondary btn-sm">Back</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

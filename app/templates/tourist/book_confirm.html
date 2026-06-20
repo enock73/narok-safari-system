@@ -1,0 +1,215 @@
+{% extends 'shared/base.html' %}
+{% block title %}Booking Confirmed!{% endblock %}
+{% block page_title %}Booking Confirmed{% endblock %}
+
+{% block content %}
+<!-- Progress — all done -->
+<div style="display:flex;align-items:center;gap:0;margin-bottom:28px;">
+  {% for i, label in [(1,'Guide'),(2,'Details'),(3,'Passengers'),(4,'Payment'),(5,'Confirm')] %}
+  <div style="text-align:center;">
+    <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;background:var(--forest-{% if i < 5 %}400{% else %}600{% endif %});color:#fff;">
+      {% if i < 5 %}<i class="bi bi-check-lg"></i>{% else %}{{ i }}{% endif %}
+    </div>
+    <div style="font-size:10px;font-weight:600;color:#6b7280;margin-top:3px;">{{ label }}</div>
+  </div>
+  {% if not loop.last %}
+  <div style="flex:1;height:3px;background:var(--forest-400);"></div>
+  {% endif %}
+  {% endfor %}
+</div>
+
+<!-- Success Banner -->
+<div class="p-4 rounded-3 mb-4 text-center"
+     style="background:linear-gradient(135deg,#1a3c2e,#2d6a4f);color:#fff;">
+  <div style="font-size:52px;margin-bottom:8px;">🎉</div>
+  <h2 style="font-family:'Space Grotesk',sans-serif;font-size:24px;margin-bottom:8px;">
+    Booking Submitted Successfully!
+  </h2>
+  <p style="color:rgba(255,255,255,0.8);font-size:14px;max-width:500px;margin:0 auto;">
+    Your safari gate clearance request has been submitted.
+    The county office will review and approve it shortly.
+  </p>
+  <div class="mt-3">
+    <span class="status-badge status-{{ clearance.status }}" style="font-size:13px;padding:6px 16px;">
+      STATUS: {{ clearance.status.upper() }}
+    </span>
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <!-- QR Code -->
+  <div class="col-lg-4">
+    <div class="qr-card">
+      <div class="fw-semibold mb-1">Gate Clearance Token</div>
+      <div class="text-muted small mb-3">Show this QR code at the entry gate</div>
+
+      {% if clearance.qr_code_path %}
+      <img src="{{ url_for('static', filename='uploads/qrcodes/' + clearance.qr_code_path) }}"
+           alt="QR Code" class="img-fluid rounded-3 mb-3"
+           style="max-width:220px;border:2px solid var(--forest-300);">
+      {% else %}
+      <div style="width:200px;height:200px;background:var(--forest-50);border:2px dashed var(--forest-300);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <div class="text-center text-muted small">
+          <i class="bi bi-qr-code display-4 d-block mb-2"></i>
+          QR code will appear after approval
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="qr-token mb-3" style="font-size:11px;">{{ clearance.token }}</div>
+
+      <div class="d-flex gap-2 flex-wrap justify-content-center">
+        {% if clearance.qr_code_path %}
+        <a href="{{ url_for('static', filename='uploads/qrcodes/' + clearance.qr_code_path) }}"
+           download="safari_ticket_{{ clearance.token[:8] }}.png"
+           class="btn btn-forest btn-sm">
+          <i class="bi bi-download me-1"></i>Download
+        </a>
+        {% endif %}
+        <button onclick="window.print()" class="btn btn-outline-forest btn-sm">
+          <i class="bi bi-printer me-1"></i>Print
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking Details -->
+  <div class="col-lg-8">
+    <div class="form-card mb-4">
+      <div class="form-section-title">Booking Details</div>
+      <div class="row g-3 small">
+        <div class="col-md-6">
+          <div class="text-muted">Clearance Token</div>
+          <div><code class="text-forest">{{ clearance.token }}</code></div>
+        </div>
+        <div class="col-md-6">
+          <div class="text-muted">Status</div>
+          <span class="status-badge status-{{ clearance.status }}">{{ clearance.status.upper() }}</span>
+        </div>
+        <div class="col-md-6">
+          <div class="text-muted">Entry Gate</div>
+          <div class="fw-semibold">{{ clearance.gate }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="text-muted">Entry Date &amp; Time</div>
+          <div class="fw-semibold">{{ clearance.entry_date }} at {{ clearance.entry_time or '07:00' }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="text-muted">Safari Guide</div>
+          <div class="fw-semibold">{{ clearance.guide.full_name }}</div>
+          <div class="text-muted" style="font-size:11px;">{{ clearance.guide.company or '' }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="text-muted">Vehicle</div>
+          <div class="fw-semibold">{{ clearance.vehicle.plate_number }}</div>
+          <div class="text-muted" style="font-size:11px;">{{ clearance.vehicle.vehicle_type }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="text-muted">Passengers</div>
+          <div class="fw-semibold">{{ clearance.passenger_count }} total</div>
+        </div>
+        <div class="col-md-6">
+          <div class="text-muted">Purpose</div>
+          <div class="fw-semibold">{{ clearance.purpose }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="text-muted">Entry Fee</div>
+          <div class="fw-semibold text-forest" style="font-size:18px;">
+            KES {{ '{:,.0f}'.format(clearance.fee_paid or 0) }}
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="text-muted">Submitted</div>
+          <div class="fw-semibold">{{ clearance.created_at.strftime('%d %b %Y %H:%M') }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Passengers -->
+    {% if passengers %}
+    <div class="form-card mb-4">
+      <div class="form-section-title">Passenger Manifest</div>
+      <div class="table-responsive">
+        <table class="table table-sm small mb-0">
+          <thead>
+            <tr>
+              <th>#</th><th>Name</th><th>Nationality</th>
+              <th>ID/Passport</th><th>Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in passengers %}
+            <tr>
+              <td class="text-muted">{{ loop.index }}</td>
+              <td class="fw-semibold">{{ p.full_name }}</td>
+              <td>{{ p.nationality or '—' }}</td>
+              <td><code class="small">{{ p.passport_id or '—' }}</code></td>
+              <td>
+                <span class="badge bg-light text-dark border">{{ p.age_group.title() }}</span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- What Happens Next -->
+    <div class="form-card">
+      <div class="form-section-title">What Happens Next?</div>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="text-center p-3 rounded-3 bg-forest-50">
+            <div style="font-size:28px;margin-bottom:8px;">⏳</div>
+            <div class="fw-semibold small">Step 1</div>
+            <div class="text-muted" style="font-size:12px;">
+              County office reviews your clearance request
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-center p-3 rounded-3 bg-forest-50">
+            <div style="font-size:28px;margin-bottom:8px;">✅</div>
+            <div class="fw-semibold small">Step 2</div>
+            <div class="text-muted" style="font-size:12px;">
+              Clearance approved — your QR code activates
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-center p-3 rounded-3 bg-forest-50">
+            <div style="font-size:28px;margin-bottom:8px;">🦁</div>
+            <div class="fw-semibold small">Step 3</div>
+            <div class="text-muted" style="font-size:12px;">
+              Show QR at gate — enjoy your safari!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-3 p-3 rounded-3" style="background:#fef9c3;border:1px solid #fde68a;">
+        <i class="bi bi-bell-fill me-1" style="color:#854d0e;"></i>
+        <span class="small" style="color:#854d0e;">
+          Check <strong>My Bookings</strong> to track your approval status.
+          Once approved, download your QR code ticket.
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Action buttons -->
+<div class="d-flex gap-3 justify-content-center mt-4 flex-wrap">
+  <a href="{{ url_for('tourist.my_bookings') }}" class="btn btn-forest">
+    <i class="bi bi-list-check me-2"></i>View My Bookings
+  </a>
+  <a href="{{ url_for('tourist.book') }}" class="btn btn-outline-forest">
+    <i class="bi bi-plus-circle me-2"></i>Book Another Safari
+  </a>
+  <a href="/" class="btn btn-outline-secondary">
+    <i class="bi bi-house me-2"></i>Back to Home
+  </a>
+</div>
+{% endblock %}

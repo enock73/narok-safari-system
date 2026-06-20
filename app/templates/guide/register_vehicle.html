@@ -1,0 +1,73 @@
+{% extends 'shared/base.html' %}
+{% block title %}Register Vehicle{% endblock %}
+{% block page_title %}Register Vehicle{% endblock %}
+{% block content %}
+<div class="section-header mb-4">
+  <h1 class="section-title">Register a Vehicle</h1>
+  <a href="{{ url_for('guide.vehicles') }}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Back
+  </a>
+</div>
+
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="form-card">
+      <div class="form-section-title">Vehicle Details</div>
+      <form method="POST" action="{{ url_for('guide.register_vehicle') }}">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Plate Number *</label>
+            <input type="text" class="form-control text-uppercase" name="plate_number"
+                   placeholder="KAA 000A" required>
+            <div class="form-text">Enter as registered with NTSA</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Vehicle Type *</label>
+            <select name="vehicle_type" class="form-select" required>
+              <option value="">— Select type —</option>
+              {% for t in ['Land Cruiser','Land Rover','Minivan','Bus','Motorcycle','Other'] %}
+              <option value="{{ t }}">{{ t }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Make</label>
+            <input type="text" class="form-control" name="make" placeholder="Toyota, Land Rover…">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Model</label>
+            <input type="text" class="form-control" name="model" placeholder="Land Cruiser 76, Defender…">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Year</label>
+            <input type="number" class="form-control" name="year" min="1990" max="2025" placeholder="2020">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Colour</label>
+            <input type="text" class="form-control" name="color" placeholder="White">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Passenger Capacity *</label>
+            <input type="number" class="form-control" name="capacity" min="1" max="60" value="7" required>
+          </div>
+          <div class="col-12"><hr class="my-1"></div>
+          <div class="col-md-6">
+            <label class="form-label">Insurance Certificate No.</label>
+            <input type="text" class="form-control" name="insurance_number">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Insurance Expiry Date</label>
+            <input type="date" class="form-control" name="insurance_expiry">
+          </div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+          <button type="submit" class="btn btn-forest">
+            <i class="bi bi-truck-front me-2"></i>Register Vehicle
+          </button>
+          <a href="{{ url_for('guide.vehicles') }}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

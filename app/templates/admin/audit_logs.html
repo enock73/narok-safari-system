@@ -1,0 +1,63 @@
+{% extends 'shared/base.html' %}
+{% block title %}Audit Logs{% endblock %}
+{% block page_title %}Audit Logs{% endblock %}
+{% block content %}
+<div class="section-header mb-4">
+  <h1 class="section-title">Audit Logs</h1>
+  <span class="text-muted small">System activity trail</span>
+</div>
+
+<div class="data-table-wrap">
+  <div class="data-table-header">
+    <div class="data-table-title">Activity Log <span class="badge bg-secondary ms-2">{{ logs.total }}</span></div>
+  </div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr><th>Timestamp</th><th>User</th><th>Action</th><th>Entity</th><th>Details</th><th>IP Address</th></tr>
+      </thead>
+      <tbody>
+        {% for log in logs.items %}
+        <tr>
+          <td class="small text-muted">{{ log.created_at.strftime('%d %b %Y %H:%M:%S') }}</td>
+          <td class="small">{{ log.user.full_name if log.user else 'System' }}</td>
+          <td>
+            <span class="badge bg-{{ 'danger' if 'DELETE' in log.action or 'REJECT' in log.action else 'success' if 'LOGIN' in log.action or 'APPROVE' in log.action else 'primary' }}-subtle
+                         text-{{ 'danger' if 'DELETE' in log.action or 'REJECT' in log.action else 'success' if 'LOGIN' in log.action or 'APPROVE' in log.action else 'primary' }}">
+              {{ log.action }}
+            </span>
+          </td>
+          <td class="small">{{ log.entity_type or '—' }} {% if log.entity_id %}#{{ log.entity_id }}{% endif %}</td>
+          <td class="small text-muted">{{ log.details or '—' }}</td>
+          <td class="small"><code>{{ log.ip_address or '—' }}</code></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center text-muted py-4">No audit records found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if logs.pages > 1 %}
+  <div class="d-flex justify-content-center py-3">
+    <nav><ul class="pagination pagination-sm mb-0">
+      {% if logs.has_prev %}
+      <li class="page-item"><a class="page-link" href="?page={{ logs.prev_num }}">‹</a></li>
+      {% endif %}
+      {% for p in logs.iter_pages() %}
+        {% if p %}
+        <li class="page-item {% if p == logs.page %}active{% endif %}">
+          <a class="page-link" href="?page={{ p }}">{{ p }}</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% endif %}
+      {% endfor %}
+      {% if logs.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ logs.next_num }}">›</a></li>
+      {% endif %}
+    </ul></nav>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

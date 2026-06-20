@@ -1,0 +1,62 @@
+{% extends 'shared/base.html' %}
+{% block title %}Create User{% endblock %}
+{% block page_title %}Create User{% endblock %}
+{% block content %}
+<div class="section-header mb-4">
+  <h1 class="section-title">Create New User</h1>
+  <a href="{{ url_for('admin.users') }}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Back
+  </a>
+</div>
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="form-card">
+      <div class="form-section-title">User Information</div>
+      <form method="POST">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Full Name *</label>
+            <input type="text" class="form-control" name="full_name" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Email *</label>
+            <input type="email" class="form-control" name="email" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Phone</label>
+            <input type="tel" class="form-control" name="phone">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">National ID</label>
+            <input type="text" class="form-control" name="id_number">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Role *</label>
+            <select name="role" class="form-select" required>
+              <option value="guide">Tour Guide</option>
+              <option value="admin">Admin (County Official)</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Guide License No.</label>
+            <input type="text" class="form-control" name="license_number">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Company / Organization</label>
+            <input type="text" class="form-control" name="company">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Initial Password</label>
+            <input type="text" class="form-control" name="password" value="Mara@2024" required>
+            <div class="form-text">User should change this on first login.</div>
+          </div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+          <button type="submit" class="btn btn-forest"><i class="bi bi-person-plus me-2"></i>Create User</button>
+          <a href="{{ url_for('admin.users') }}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

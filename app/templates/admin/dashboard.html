@@ -1,0 +1,219 @@
+{% extends 'shared/base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card green">
+      <div class="stat-icon green"><i class="bi bi-people-fill"></i></div>
+      <div class="stat-value">{{ total_guides }}</div>
+      <div class="stat-label">Registered Guides</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card amber">
+      <div class="stat-icon amber"><i class="bi bi-pass-fill"></i></div>
+      <div class="stat-value">{{ today_clearances }}</div>
+      <div class="stat-label">Today's Clearances</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card blue">
+      <div class="stat-icon blue"><i class="bi bi-cash-stack"></i></div>
+      <div class="stat-value">{{ '{:,.0f}'.format(today_revenue) }}</div>
+      <div class="stat-label">Today's Revenue (KES)</div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="stat-card red">
+      <div class="stat-icon red"><i class="bi bi-clock-history"></i></div>
+      <div class="stat-value">{{ pending_clearances }}</div>
+      <div class="stat-label">Pending Approvals</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <!-- Daily Clearances Chart -->
+  <div class="col-lg-8">
+    <div class="chart-card h-100">
+      <div class="chart-card-header">
+        <div class="chart-card-title"><i class="bi bi-bar-chart-fill text-forest me-2"></i>Gate Clearances — Last 7 Days</div>
+        <div class="d-flex gap-2">
+          <span class="badge bg-success-subtle text-success">{{ today_clearances }} today</span>
+          <span class="badge bg-warning-subtle text-warning">{{ today_sightings }} sightings</span>
+        </div>
+      </div>
+      <canvas id="clearanceChart" height="100"></canvas>
+    </div>
+  </div>
+  <!-- Revenue by Gate -->
+  <div class="col-lg-4">
+    <div class="chart-card h-100">
+      <div class="chart-card-header">
+        <div class="chart-card-title"><i class="bi bi-pie-chart-fill text-amber me-2"></i>Revenue by Gate</div>
+      </div>
+      <canvas id="gateRevenueChart" height="200"></canvas>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <!-- Month Revenue -->
+  <div class="col-lg-4">
+    <div class="stat-card gold" style="padding:28px;">
+      <div class="stat-icon gold"><i class="bi bi-currency-exchange"></i></div>
+      <div class="stat-value" style="font-size:24px;">KES {{ '{:,.0f}'.format(month_revenue) }}</div>
+      <div class="stat-label">This Month's Revenue</div>
+      <div class="stat-trend text-success mt-2">
+        <i class="bi bi-graph-up me-1"></i>{{ total_vehicles }} vehicles registered
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Species -->
+  <div class="col-lg-4">
+    <div class="chart-card h-100">
+      <div class="chart-card-header">
+        <div class="chart-card-title"><i class="bi bi-binoculars-fill text-forest me-2"></i>Top Wildlife Sightings</div>
+        <a href="{{ url_for('admin.wildlife') }}" class="btn btn-sm btn-outline-forest">View All</a>
+      </div>
+      {% for species, total in top_species %}
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="small fw-semibold">{{ species }}</span>
+        <span class="badge bg-forest-50 text-forest">{{ total }}</span>
+      </div>
+      {% else %}
+      <div class="text-muted small">No sightings recorded yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Active Alerts -->
+  <div class="col-lg-4">
+    <div class="chart-card h-100">
+      <div class="chart-card-header">
+        <div class="chart-card-title"><i class="bi bi-bell-fill text-danger me-2"></i>Active Alerts</div>
+        <a href="{{ url_for('admin.alerts') }}" class="btn btn-sm btn-outline-forest">Manage</a>
+      </div>
+      {% for alert in alerts %}
+      <div class="system-alert mb-2 rounded-2 p-2"
+           style="background:{% if alert.alert_type == 'danger' %}#fee2e2{% elif alert.alert_type == 'warning' %}#fef9c3{% elif alert.alert_type == 'success' %}#dcfce7{% else %}#e0f2fe{% endif %};">
+        <i class="bi bi-{% if alert.alert_type == 'danger' %}exclamation-triangle{% elif alert.alert_type == 'warning' %}exclamation-circle{% elif alert.alert_type == 'success' %}check-circle{% else %}info-circle{% endif %} small mt-1"></i>
+        <div>
+          <div class="small fw-semibold">{{ alert.title }}</div>
+          <div class="small text-muted">{{ alert.message[:60] }}{% if alert.message|length > 60 %}...{% endif %}</div>
+        </div>
+      </div>
+      {% else %}
+      <div class="text-muted small">No active alerts.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Recent Clearances Table -->
+<div class="data-table-wrap">
+  <div class="data-table-header">
+    <div class="data-table-title"><i class="bi bi-list-check me-2"></i>Recent Gate Clearances</div>
+    <a href="{{ url_for('admin.clearances') }}" class="btn btn-sm btn-forest">View All</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Token</th><th>Guide</th><th>Vehicle</th><th>Gate</th>
+          <th>Date</th><th>Pax</th><th>Status</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in recent_clearances %}
+        <tr>
+          <td><code class="text-forest">{{ c.token[:8] }}...</code></td>
+          <td>{{ c.guide.full_name }}</td>
+          <td><span class="badge bg-light text-dark border">{{ c.vehicle.plate_number }}</span></td>
+          <td>{{ c.gate }}</td>
+          <td>{{ c.entry_date }}</td>
+          <td>{{ c.passenger_count }}</td>
+          <td>
+            <span class="status-badge status-{{ c.status }}">{{ c.status }}</span>
+          </td>
+          <td>
+            <a href="{{ url_for('admin.clearance_detail', clearance_id=c.id) }}"
+               class="btn btn-sm btn-outline-forest py-0">View</a>
+            {% if c.status == 'pending' %}
+            <form method="POST" action="{{ url_for('admin.approve_clearance', clearance_id=c.id) }}"
+                  class="d-inline" onsubmit="return confirm('Approve this clearance?')">
+              <button class="btn btn-sm btn-success py-0">✓</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted py-4">No clearances yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const dailyData = {{ daily_data|safe }};
+const gateRevenue = {{ gate_revenue_json|safe if gate_revenue_json else '[]' }};
+
+// Clearance bar chart
+const ctxBar = document.getElementById('clearanceChart').getContext('2d');
+new Chart(ctxBar, {
+  type: 'bar',
+  data: {
+    labels: dailyData.map(d => d.date),
+    datasets: [{
+      label: 'Clearances',
+      data: dailyData.map(d => d.count),
+      backgroundColor: 'rgba(82,183,136,0.8)',
+      borderColor: '#2d6a4f',
+      borderWidth: 2,
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, grid: { color: '#f0faf2' }, ticks: { stepSize: 1 } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+// Gate revenue doughnut
+const grvRaw = {{ gate_revenue_json|safe if gate_revenue_json else '[]' }};
+const gateLabels = grvRaw.map(g => g.gate || 'Unknown');
+const gateData   = grvRaw.map(g => g.total || 0);
+
+const ctxPie = document.getElementById('gateRevenueChart').getContext('2d');
+new Chart(ctxPie, {
+  type: 'doughnut',
+  data: {
+    labels: gateLabels.length ? gateLabels : ['No data'],
+    datasets: [{
+      data: gateData.length ? gateData : [1],
+      backgroundColor: ['#2d6a4f','#52b788','#74c69d','#f4a261','#f7ba8a','#0ea5e9'],
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '65%',
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11 } } }
+    }
+  }
+});
+</script>
+{% endblock %}

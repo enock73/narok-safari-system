@@ -1,0 +1,133 @@
+{% extends 'shared/base.html' %}
+{% block title %}Revenue Monitoring{% endblock %}
+{% block page_title %}Revenue Monitoring{% endblock %}
+
+{% block content %}
+<div class="section-header mb-4">
+  <h1 class="section-title">Revenue Monitoring</h1>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('admin.download_report', type='revenue', format='pdf') }}" class="btn btn-sm btn-outline-danger">
+      <i class="bi bi-file-earmark-pdf me-1"></i>PDF Report
+    </a>
+    <a href="{{ url_for('admin.download_report', type='revenue', format='excel') }}" class="btn btn-sm btn-outline-success">
+      <i class="bi bi-file-earmark-excel me-1"></i>Excel
+    </a>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-md-4">
+    <div class="stat-card gold">
+      <div class="stat-icon gold"><i class="bi bi-currency-exchange"></i></div>
+      <div class="stat-value">KES {{ '{:,.0f}'.format(total_month) }}</div>
+      <div class="stat-label">This Month Total</div>
+    </div>
+  </div>
+  {% for g in gate_totals %}
+  <div class="col-sm-6 col-md-4">
+    <div class="stat-card green">
+      <div class="stat-icon green"><i class="bi bi-geo-fill"></i></div>
+      <div class="stat-value" style="font-size:18px;">KES {{ '{:,.0f}'.format(g.total) }}</div>
+      <div class="stat-label">{{ g.gate }}</div>
+      <div class="stat-trend text-muted small">{{ g.transactions }} transactions</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Daily Revenue Chart -->
+<div class="chart-card mb-4">
+  <div class="chart-card-header">
+    <div class="chart-card-title"><i class="bi bi-graph-up text-forest me-2"></i>Daily Revenue — Last 30 Days</div>
+  </div>
+  <canvas id="revenueChart" height="80"></canvas>
+</div>
+
+<!-- Transactions Table -->
+<div class="data-table-wrap">
+  <div class="data-table-header">
+    <div class="data-table-title">Revenue Transactions</div>
+    <span class="text-muted small">Total: <strong>{{ transactions.total }}</strong> records</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr><th>Date</th><th>Gate</th><th>Guide</th><th>Amount (KES)</th><th>Method</th><th>Clearance</th></tr>
+      </thead>
+      <tbody>
+        {% for r in transactions.items %}
+        <tr>
+          <td class="small">{{ r.collected_at.strftime('%d %b %Y %H:%M') }}</td>
+          <td class="small">{{ r.gate or '—' }}</td>
+          <td class="small">{{ r.clearance.guide.full_name if r.clearance else '—' }}</td>
+          <td class="fw-semibold text-forest">{{ '{:,.2f}'.format(r.amount) }}</td>
+          <td>
+            <span class="badge bg-light text-dark border">{{ r.payment_method or 'Cash' }}</span>
+          </td>
+          <td><code class="small text-muted">{{ r.clearance.token[:8] }}… </code></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center text-muted py-4">No transactions yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if transactions.pages > 1 %}
+  <div class="d-flex justify-content-center py-3">
+    <nav>
+      <ul class="pagination pagination-sm mb-0">
+        {% if transactions.has_prev %}
+        <li class="page-item"><a class="page-link" href="?page={{ transactions.prev_num }}">‹</a></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ transactions.page }}</span></li>
+        {% if transactions.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ transactions.next_num }}">›</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const dailyRevenue = {{ daily_revenue|safe }};
+const labels = dailyRevenue.map(d => d.day);
+const data = dailyRevenue.map(d => d.total);
+const ctx = document.getElementById('revenueChart').getContext('2d');
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [{
+      label: 'Revenue (KES)',
+      data,
+      backgroundColor: 'rgba(82,183,136,0.12)',
+      borderColor: '#2d6a4f',
+      borderWidth: 2.5,
+      fill: true,
+      tension: 0.4,
+      pointBackgroundColor: '#2d6a4f',
+      pointRadius: 3
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: {
+        beginAtZero: true,
+        grid: { color: '#f0faf2' },
+        ticks: {
+          callback: v => 'KES ' + v.toLocaleString()
+        }
+      },
+      x: { grid: { display: false }, ticks: { maxTicksLimit: 10 } }
+    }
+  }
+});
+</script>
+{% endblock %}

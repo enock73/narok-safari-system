@@ -1,0 +1,283 @@
+{% extends 'shared/base.html' %}
+{% block title %}Wildlife Tracking{% endblock %}
+{% block page_title %}Wildlife Tracking Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+  .species-badge { padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+  .cat-big-five   { background:#fef9c3; color:#854d0e; }
+  .cat-predator   { background:#fee2e2; color:#991b1b; }
+  .cat-bird       { background:#e0f2fe; color:#0369a1; }
+  .cat-plains     { background:#dcfce7; color:#166534; }
+  .cat-primate    { background:#ede9fe; color:#5b21b6; }
+  .cat-reptile    { background:#f3f4f6; color:#374151; }
+  .cat-other      { background:#fce7f3; color:#9d174d; }
+  #wildlifeMap    { height: 500px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="section-header mb-4">
+  <h1 class="section-title">Wildlife Tracking Map</h1>
+  <div class="d-flex gap-2">
+    <select id="dayFilter" class="form-select form-select-sm" style="width:auto;">
+      <option value="7">Last 7 days</option>
+      <option value="30">Last 30 days</option>
+      <option value="90">Last 90 days</option>
+    </select>
+    <select id="categoryFilter" class="form-select form-select-sm" style="width:auto;">
+      <option value="">All Categories</option>
+      {% for cat in ['Big Five','Plains Game','Predator','Primate','Bird','Reptile','Other Mammal'] %}
+      <option value="{{ cat }}">{{ cat }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-forest btn-sm" onclick="refreshMap()">
+      <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+    </button>
+  </div>
+</div>
+
+<div class="row g-4 mb-4">
+  <!-- Stats mini-cards -->
+  <div class="col-6 col-md-3">
+    <div class="stat-card green">
+      <div class="stat-icon green"><i class="bi bi-geo-fill"></i></div>
+      <div class="stat-value">{{ sightings|length }}</div>
+      <div class="stat-label">Recent Sightings</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card amber">
+      <div class="stat-icon amber"><i class="bi bi-binoculars-fill"></i></div>
+      <div class="stat-value">{{ species_counts|length }}</div>
+      <div class="stat-label">Species Recorded</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card red">
+      <div class="stat-icon red"><i class="bi bi-exclamation-triangle-fill"></i></div>
+      <div class="stat-value">{{ sightings|selectattr('threat_level','ne','none')|list|length }}</div>
+      <div class="stat-label">Threat Sightings</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="stat-card blue">
+      <div class="stat-icon blue"><i class="bi bi-camera-fill"></i></div>
+      <div class="stat-value">{{ sightings|sum(attribute='count') }}</div>
+      <div class="stat-label">Total Animals</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Interactive Map -->
+  <div class="col-lg-8">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-card-title"><i class="bi bi-map-fill text-forest me-2"></i>Maasai Mara — Sighting Locations</div>
+        <div id="mapStatus" class="badge bg-success-subtle text-success small">Live</div>
+      </div>
+      <div id="wildlifeMap" class="map-container"></div>
+      <!-- Legend -->
+      <div class="d-flex flex-wrap gap-2 mt-3">
+        <span class="species-badge cat-big-five">● Big Five</span>
+        <span class="species-badge cat-predator">● Predator</span>
+        <span class="species-badge cat-plains">● Plains Game</span>
+        <span class="species-badge cat-bird">● Bird</span>
+        <span class="species-badge cat-primate">● Primate</span>
+        <span class="species-badge cat-reptile">● Reptile</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Species Summary -->
+  <div class="col-lg-4">
+    <div class="chart-card mb-4" style="max-height:300px;overflow-y:auto;">
+      <div class="chart-card-header">
+        <div class="chart-card-title">Species Totals</div>
+      </div>
+      {% for s in species_counts %}
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <div class="small fw-semibold">{{ s.common_name or s.species }}</div>
+          <div class="text-muted" style="font-size:11px;">{{ s.category }}</div>
+        </div>
+        <span class="badge bg-forest-50 text-forest fw-bold">{{ s.total }}</span>
+      </div>
+      {% else %}
+      <div class="text-muted small">No sightings yet.</div>
+      {% endfor %}
+    </div>
+
+    <!-- Category Chart -->
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div class="chart-card-title">By Category</div>
+      </div>
+      <canvas id="categoryChart" height="200"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Sightings Table -->
+<div class="data-table-wrap mt-4">
+  <div class="data-table-header">
+    <div class="data-table-title">Recent Sightings</div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('admin.download_report', type='wildlife', format='excel') }}" class="btn btn-sm btn-outline-success">
+        <i class="bi bi-file-earmark-excel me-1"></i>Export
+      </a>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr><th>Species</th><th>Category</th><th>Count</th><th>Location</th><th>Behavior</th><th>Reporter</th><th>Date/Time</th><th>Threat</th></tr>
+      </thead>
+      <tbody>
+        {% for s in sightings[:25] %}
+        <tr>
+          <td>
+            <div class="fw-semibold small">{{ s.common_name or s.species }}</div>
+            <div class="text-muted" style="font-size:11px;font-style:italic;">{{ s.species if s.common_name else '' }}</div>
+          </td>
+          <td>
+            {% set cat_cls = {'Big Five':'cat-big-five','Predator':'cat-predator','Plains Game':'cat-plains','Bird':'cat-bird','Primate':'cat-primate','Reptile':'cat-reptile'} %}
+            <span class="species-badge {{ cat_cls.get(s.category, 'cat-other') }}">{{ s.category }}</span>
+          </td>
+          <td class="fw-semibold">{{ s.count }}</td>
+          <td class="small">{{ s.location_name or ('{:.4f}, {:.4f}'.format(s.latitude|float, s.longitude|float)) }}</td>
+          <td class="small">{{ s.behavior }}</td>
+          <td class="small">{{ s.reporter.full_name }}</td>
+          <td class="small">{{ s.sighted_at.strftime('%d %b %H:%M') }}</td>
+          <td>
+            {% if s.threat_level != 'none' %}
+            <span class="badge bg-danger-subtle text-danger">{{ s.threat_level.upper() }}</span>
+            {% else %}
+            <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted py-4">No sightings recorded.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ── Map Initialization ────────────────────────────────────
+const map = L.map('wildlifeMap').setView([-1.5000, 35.1500], 10);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap contributors',
+  maxZoom: 18
+}).addTo(map);
+
+// Gate markers
+const gates = [
+  {name:'Sekenani Gate',  lat:-1.5667, lng:35.1833},
+  {name:'Talek Gate',     lat:-1.6667, lng:35.2167},
+  {name:'Musiara Gate',   lat:-1.3833, lng:35.0333},
+  {name:'Oloololo Gate',  lat:-1.4000, lng:35.0000},
+  {name:'Sand River Gate',lat:-1.6500, lng:35.3333},
+  {name:'Ololaimutia Gate',lat:-1.6167, lng:35.1500},
+];
+gates.forEach(g => {
+  L.marker([g.lat, g.lng], {
+    icon: L.divIcon({
+      className:'',
+      html:`<div style="background:#1a3c2e;color:#fff;padding:4px 8px;border-radius:12px;font-size:10px;font-weight:600;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,0.3);">🚧 ${g.name}</div>`,
+      iconAnchor:[40,10]
+    })
+  }).addTo(map);
+});
+
+const catColors = {
+  'Big Five':'#d4a017','Predator':'#dc2626','Plains Game':'#2d6a4f',
+  'Bird':'#0ea5e9','Primate':'#7c3aed','Reptile':'#6b7280','Other Mammal':'#f4a261'
+};
+
+let markers = [];
+
+function clearMarkers() {
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
+}
+
+function loadSightings(data) {
+  clearMarkers();
+  data.forEach(s => {
+    const color = catColors[s.category] || '#6b7280';
+    const icon = L.divIcon({
+      className: '',
+      html: `<div class="mara-marker" style="background:${color};width:${Math.min(14+s.count*2,38)}px;height:${Math.min(14+s.count*2,38)}px;" title="${s.species}">
+               <span style="color:#fff;font-size:10px;font-weight:700;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">${s.count > 9 ? '9+' : s.count}</span>
+             </div>`,
+      iconSize:[24,24],
+      iconAnchor:[12,12]
+    });
+    const m = L.marker([s.lat, s.lng], { icon })
+      .addTo(map)
+      .bindPopup(`
+        <div style="min-width:200px;">
+          <div style="font-weight:700;color:#1a3c2e;font-size:14px;">${s.species}</div>
+          <div style="font-size:12px;color:#6b7280;margin-bottom:6px;">${s.category}</div>
+          <div class="d-flex gap-2 flex-wrap mb-2">
+            <span style="background:#f0faf2;padding:2px 8px;border-radius:10px;font-size:11px;color:#2d6a4f;">Count: ${s.count}</span>
+            <span style="background:#f0faf2;padding:2px 8px;border-radius:10px;font-size:11px;color:#2d6a4f;">${s.behavior}</span>
+          </div>
+          <div style="font-size:11px;color:#374151;">📍 ${s.location || s.lat.toFixed(4)+', '+s.lng.toFixed(4)}</div>
+          <div style="font-size:11px;color:#6b7280;">🕐 ${s.time}</div>
+          ${s.threat !== 'none' ? `<div style="margin-top:4px;background:#fee2e2;padding:2px 8px;border-radius:8px;font-size:11px;color:#991b1b;">⚠ Threat: ${s.threat.toUpperCase()}</div>` : ''}
+        </div>
+      `);
+    markers.push(m);
+  });
+}
+
+// Initial load from server-rendered data
+const initialData = {{ map_data|safe }};
+loadSightings(initialData);
+
+async function refreshMap() {
+  const days = document.getElementById('dayFilter').value;
+  const cat = document.getElementById('categoryFilter').value;
+  try {
+    const r = await fetch(`/api/v1/wildlife/map?days=${days}&category=${encodeURIComponent(cat)}`);
+    const d = await r.json();
+    loadSightings(d.sightings);
+    document.getElementById('mapStatus').textContent = `${d.count} sightings`;
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+document.getElementById('dayFilter').addEventListener('change', refreshMap);
+document.getElementById('categoryFilter').addEventListener('change', refreshMap);
+
+// Category doughnut
+const catCounts = {};
+initialData.forEach(s => { catCounts[s.category] = (catCounts[s.category]||0) + s.count; });
+const ctxCat = document.getElementById('categoryChart').getContext('2d');
+new Chart(ctxCat, {
+  type: 'doughnut',
+  data: {
+    labels: Object.keys(catCounts),
+    datasets: [{
+      data: Object.values(catCounts),
+      backgroundColor: Object.keys(catCounts).map(k => catColors[k] || '#6b7280'),
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '60%',
+    plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }
+  }
+});
+</script>
+{% endblock %}

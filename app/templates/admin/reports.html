@@ -1,0 +1,74 @@
+{% extends 'shared/base.html' %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Reports & Analytics{% endblock %}
+{% block content %}
+<div class="section-header mb-4">
+  <h1 class="section-title">Reports & Analytics</h1>
+</div>
+
+<div class="row g-4">
+  {% for report in [
+    {'id':'clearances','icon':'bi-pass-fill','color':'green','title':'Gate Clearances Report','desc':'All clearance requests, approvals, and passenger data by date range.'},
+    {'id':'revenue','icon':'bi-cash-stack','color':'gold','title':'Revenue Report','desc':'Revenue collected by gate, payment method, and daily summaries.'},
+    {'id':'wildlife','icon':'bi-binoculars-fill','color':'amber','title':'Wildlife Sightings Report','desc':'All animal sightings with GPS data, species breakdown, and threat levels.'},
+    {'id':'guides','icon':'bi-people-fill','color':'blue','title':'Tour Guides Report','desc':'All registered guides, companies, and their clearance activity.'},
+  ] %}
+  <div class="col-md-6">
+    <div class="form-card">
+      <div class="d-flex align-items-start gap-3 mb-3">
+        <div class="stat-icon {{ report.color }}"><i class="bi {{ report.icon }}"></i></div>
+        <div>
+          <h6 class="mb-1">{{ report.title }}</h6>
+          <p class="text-muted small mb-0">{{ report.desc }}</p>
+        </div>
+      </div>
+      <div id="form-{{ report.id }}">
+        {% if report.id != 'guides' %}
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label class="form-label mb-1 small">From Date</label>
+            <input type="date" class="form-control form-control-sm" id="from-{{ report.id }}"
+                   value="{{ now_month }}" required>
+          </div>
+          <div class="col-6">
+            <label class="form-label mb-1 small">To Date</label>
+            <input type="date" class="form-control form-control-sm" id="to-{{ report.id }}"
+                   value="{{ now_today }}" required>
+          </div>
+        </div>
+        {% endif %}
+        <div class="d-flex gap-2">
+          <a href="#" class="btn btn-outline-danger btn-sm flex-grow-1"
+             onclick="downloadReport('{{ report.id }}', 'pdf'); return false;">
+            <i class="bi bi-file-earmark-pdf me-1"></i>Download PDF
+          </a>
+          <a href="#" class="btn btn-outline-success btn-sm flex-grow-1"
+             onclick="downloadReport('{{ report.id }}', 'excel'); return false;">
+            <i class="bi bi-file-earmark-excel me-1"></i>Download Excel
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function downloadReport(type, format) {
+  const fromEl = document.getElementById('from-' + type);
+  const toEl = document.getElementById('to-' + type);
+  const from = fromEl ? fromEl.value : '';
+  const to = toEl ? toEl.value : '';
+  const url = `/admin/reports/download?type=${type}&format=${format}&date_from=${from}&date_to=${to}`;
+  window.location.href = url;
+}
+
+// Set default dates
+const today = new Date().toISOString().split('T')[0];
+const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+document.querySelectorAll('[id^="from-"]').forEach(el => el.value = monthStart);
+document.querySelectorAll('[id^="to-"]').forEach(el => el.value = today);
+</script>
+{% endblock %}

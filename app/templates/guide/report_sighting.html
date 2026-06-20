@@ -1,0 +1,257 @@
+{% extends 'shared/base.html' %}
+{% block title %}Report Wildlife Sighting{% endblock %}
+{% block page_title %}Report Wildlife Sighting{% endblock %}
+
+{% block extra_css %}
+<style>#pickMap { height: 300px; cursor: crosshair; }</style>
+{% endblock %}
+
+{% block content %}
+<div class="section-header mb-4">
+  <h1 class="section-title">Report Wildlife Sighting</h1>
+  <a href="{{ url_for('guide.sightings') }}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Back
+  </a>
+</div>
+
+<form method="POST" enctype="multipart/form-data" id="sightingForm">
+  <div class="row g-4">
+    <!-- Left: Form -->
+    <div class="col-lg-8">
+      <!-- Species Info -->
+      <div class="form-card mb-4">
+        <div class="form-section-title">Animal Information</div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Scientific / Species Name *</label>
+            <input type="text" name="species" class="form-control" required
+                   placeholder="Panthera leo" list="speciesList">
+            <datalist id="speciesList">
+              <option value="Panthera leo">
+              <option value="Loxodonta africana">
+              <option value="Syncerus caffer">
+              <option value="Diceros bicornis">
+              <option value="Panthera pardus">
+              <option value="Crocuta crocuta">
+              <option value="Connochaetes taurinus">
+              <option value="Equus quagga">
+              <option value="Giraffa camelopardalis">
+              <option value="Hippopotamus amphibius">
+              <option value="Crocodylus niloticus">
+              <option value="Acinonyx jubatus">
+            </datalist>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Common Name</label>
+            <input type="text" name="common_name" class="form-control"
+                   placeholder="Lion, Elephant…" id="commonName">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Category *</label>
+            <select name="category" class="form-select" required>
+              {% for c in categories %}
+              <option value="{{ c }}">{{ c }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Count *</label>
+            <input type="number" name="count" class="form-control" min="1" value="1" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Behavior</label>
+            <select name="behavior" class="form-select">
+              {% for b in behaviors %}
+              <option value="{{ b }}">{{ b }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Date & Time Sighted</label>
+            <input type="datetime-local" name="sighted_at" class="form-control"
+                   id="sightedAt">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Threat Level</label>
+            <select name="threat_level" class="form-select">
+              <option value="none">None</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High (Alert required)</option>
+            </select>
+          </div>
+          {% if my_clearances %}
+          <div class="col-12">
+            <label class="form-label">Link to Clearance <span class="text-muted">(optional)</span></label>
+            <select name="clearance_id" class="form-select">
+              <option value="">— No linked clearance —</option>
+              {% for c in my_clearances %}
+              <option value="{{ c.id }}">{{ c.gate }} · {{ c.entry_date }} · {{ c.vehicle.plate_number }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+          <div class="col-12">
+            <label class="form-label">Notes</label>
+            <textarea name="notes" class="form-control" rows="2"
+                      placeholder="Additional observations, herd composition, unusual behaviour…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- GPS Location -->
+      <div class="form-card mb-4">
+        <div class="form-section-title">GPS Location</div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <label class="form-label">Latitude *</label>
+            <input type="number" name="latitude" id="latInput" class="form-control"
+                   step="any" placeholder="-1.5000" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Longitude *</label>
+            <input type="number" name="longitude" id="lngInput" class="form-control"
+                   step="any" placeholder="35.1500" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Location Name</label>
+            <input type="text" name="location_name" id="locationName" class="form-control"
+                   placeholder="Near Mara River">
+          </div>
+        </div>
+        <div class="d-flex gap-2 mb-3">
+          <button type="button" class="btn btn-outline-forest btn-sm" onclick="getMyLocation()">
+            <i class="bi bi-geo-alt-fill me-1"></i>Use My GPS
+          </button>
+          <span class="text-muted small align-self-center">or click on the map below</span>
+        </div>
+        <div id="pickMap" class="map-container"></div>
+        <div class="form-text mt-1">
+          <i class="bi bi-info-circle me-1"></i>Click the map to set coordinates, or use your device GPS.
+        </div>
+      </div>
+
+      <!-- Photos -->
+      <div class="form-card mb-4">
+        <div class="form-section-title">Wildlife Photos <span class="text-muted">(optional)</span></div>
+        <input type="file" name="photos[]" class="form-control" multiple
+               accept="image/jpeg,image/png,image/webp" id="photoInput">
+        <div class="form-text">Upload up to 5 photos. Supported: JPG, PNG, WebP. Max 16MB total.</div>
+        <div id="photoPreview" class="d-flex flex-wrap gap-2 mt-2"></div>
+      </div>
+    </div>
+
+    <!-- Right: Tips & Submit -->
+    <div class="col-lg-4">
+      <div class="form-card mb-4">
+        <div class="form-section-title">Species Quick Reference</div>
+        <div class="small">
+          {% set species_guide = [
+            ('🦁','Lion','Big Five','Panthera leo'),
+            ('🐘','Elephant','Big Five','Loxodonta africana'),
+            ('🦏','Rhino','Big Five','Diceros bicornis'),
+            ('🦛','Buffalo','Big Five','Syncerus caffer'),
+            ('🐆','Leopard','Big Five','Panthera pardus'),
+            ('🐊','Crocodile','Reptile','Crocodylus niloticus'),
+            ('🦓','Zebra','Plains Game','Equus quagga'),
+            ('🦒','Giraffe','Plains Game','Giraffa camelopardalis'),
+            ('🦌','Wildebeest','Plains Game','Connochaetes taurinus'),
+            ('🐆','Cheetah','Predator','Acinonyx jubatus'),
+          ] %}
+          {% for emoji, name, cat, sci in species_guide %}
+          <a href="#" class="d-block mb-1 text-decoration-none text-reset quick-species"
+             data-name="{{ name }}" data-sci="{{ sci }}" data-cat="{{ cat }}">
+            {{ emoji }} <strong>{{ name }}</strong> <span class="text-muted">({{ cat }})</span>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="form-card">
+        <div class="form-section-title">Submit Report</div>
+        <p class="small text-muted mb-3">Your sighting will appear on the wildlife tracking map visible to county officials.</p>
+        <button type="submit" class="btn btn-forest w-100" id="submitBtn">
+          <i class="bi bi-binoculars-fill me-2"></i>Submit Sighting
+        </button>
+        <a href="{{ url_for('guide.sightings') }}" class="btn btn-outline-secondary w-100 mt-2">Cancel</a>
+      </div>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Set default datetime to now
+const now = new Date();
+now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+document.getElementById('sightedAt').value = now.toISOString().slice(0,16);
+
+// Pick-a-location map (centred on Mara)
+const pickMap = L.map('pickMap').setView([-1.5000, 35.1500], 10);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap'
+}).addTo(pickMap);
+
+let pinMarker = null;
+
+pickMap.on('click', function(e) {
+  const { lat, lng } = e.latlng;
+  document.getElementById('latInput').value = lat.toFixed(6);
+  document.getElementById('lngInput').value = lng.toFixed(6);
+  if (pinMarker) pickMap.removeLayer(pinMarker);
+  pinMarker = L.marker([lat, lng]).addTo(pickMap)
+    .bindPopup(`📍 ${lat.toFixed(4)}, ${lng.toFixed(4)}`).openPopup();
+});
+
+function getMyLocation() {
+  if (!navigator.geolocation) {
+    alert('Geolocation not supported by your browser.');
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+    document.getElementById('latInput').value = lat.toFixed(6);
+    document.getElementById('lngInput').value = lng.toFixed(6);
+    pickMap.setView([lat, lng], 13);
+    if (pinMarker) pickMap.removeLayer(pinMarker);
+    pinMarker = L.marker([lat, lng]).addTo(pickMap)
+      .bindPopup('📍 Your location').openPopup();
+  }, err => alert('Location error: ' + err.message));
+}
+
+// Quick species fill
+document.querySelectorAll('.quick-species').forEach(el => {
+  el.addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelector('[name="species"]').value = this.dataset.sci;
+    document.getElementById('commonName').value = this.dataset.name;
+    document.querySelector('[name="category"]').value = this.dataset.cat;
+  });
+});
+
+// Photo previews
+document.getElementById('photoInput').addEventListener('change', function() {
+  const preview = document.getElementById('photoPreview');
+  preview.innerHTML = '';
+  Array.from(this.files).slice(0, 5).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.style.cssText = 'width:80px;height:60px;object-fit:cover;border-radius:6px;border:2px solid #d8f3dc;';
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+// Prevent double submit
+document.getElementById('sightingForm').addEventListener('submit', function() {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting…';
+});
+</script>
+{% endblock %}

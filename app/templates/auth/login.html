@@ -1,0 +1,265 @@
+{% extends 'shared/base.html' %}
+{% block title %}Sign In — Maasai Mara Safari{% endblock %}
+{% block public_content %}
+
+<style>
+  .login-bg {
+    min-height: 100vh;
+    display: flex;
+    background: linear-gradient(135deg, #0d2118 0%, #2d6a4f 100%);
+  }
+  .login-left {
+    flex: 1;
+    background:
+      linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(26,60,46,0.8) 100%),
+      url('https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1200&q=80') center/cover no-repeat;
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100vh;
+  }
+  @media(max-width:768px){ .login-left { display:none; } }
+  .login-brand {
+    font-family: 'Playfair Display', serif;
+    color: #fff;
+    font-size: 22px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .login-brand .icon {
+    width: 42px; height: 42px;
+    background: #f4a261;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: #1a3c2e;
+  }
+  .login-tagline {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    color: #fff;
+    line-height: 1.2;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+  .login-tagline span { color: #f4a261; }
+  .login-stats {
+    display: flex; gap: 32px;
+  }
+  .login-stat-num { font-size: 24px; font-weight: 700; color: #f4a261; font-family: 'Playfair Display', serif; }
+  .login-stat-label { font-size: 12px; color: rgba(255,255,255,0.65); }
+  .login-right {
+    width: 440px;
+    flex-shrink: 0;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 40px;
+    min-height: 100vh;
+  }
+  @media(max-width:768px){
+    .login-right { width:100%; padding:32px 24px; }
+  }
+  .login-form-wrap { width: 100%; max-width: 360px; }
+  .login-logo {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .login-logo-icon {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, #2d6a4f, #52b788);
+    border-radius: 16px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    margin-bottom: 12px;
+    box-shadow: 0 8px 24px rgba(45,106,79,0.3);
+  }
+  .login-title { font-family: 'Playfair Display', serif; font-size: 24px; color: #1a3c2e; }
+  .login-sub { font-size: 13px; color: #888; margin-top: 4px; }
+  .form-label { font-size: 12px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.04em; }
+  .form-control {
+    border-color: #e0e0e0;
+    padding: 12px 16px;
+    font-size: 14px;
+    border-radius: 10px;
+    transition: all 0.2s;
+  }
+  .form-control:focus {
+    border-color: #52b788;
+    box-shadow: 0 0 0 3px rgba(82,183,136,0.12);
+  }
+  .btn-signin {
+    background: linear-gradient(135deg, #2d6a4f, #1a3c2e);
+    color: #fff;
+    border: none;
+    padding: 13px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    width: 100%;
+    transition: all 0.2s;
+  }
+  .btn-signin:hover { opacity:0.9; transform:translateY(-1px); }
+  .role-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .role-badge.admin { background:#f0faf2; color:#2d6a4f; border-color:#c8e6d0; }
+  .role-badge.guide { background:#fef9c3; color:#854d0e; border-color:#fde68a; }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+<div class="login-bg">
+
+  <!-- LEFT — Hero Panel -->
+  <div class="login-left">
+    <div class="login-brand">
+      <div class="icon">🌿</div>
+      <div>
+        <div>Maasai Mara</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.6);font-family:'Inter',sans-serif;font-weight:400;">National Reserve — Narok County</div>
+      </div>
+    </div>
+    <div>
+      <div class="login-tagline">
+        Africa's Greatest<br>Wildlife <span>Safari</span><br>Destination
+      </div>
+      <p style="color:rgba(255,255,255,0.75);font-size:15px;margin-top:16px;line-height:1.7;">
+        Official gate clearance and ecosystem management platform for the Maasai Mara National Reserve.
+      </p>
+    </div>
+    <div class="login-stats">
+      <div>
+        <div class="login-stat-num">1.5M+</div>
+        <div class="login-stat-label">Annual Visitors</div>
+      </div>
+      <div>
+        <div class="login-stat-num">95+</div>
+        <div class="login-stat-label">Wildlife Species</div>
+      </div>
+      <div>
+        <div class="login-stat-num">6</div>
+        <div class="login-stat-label">Entry Gates</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT — Login Form -->
+  <div class="login-right">
+    <div class="login-form-wrap">
+
+      <div class="login-logo">
+        <div class="login-logo-icon">🌿</div>
+        <div class="login-title">Welcome Back</div>
+        <div class="login-sub">Sign in to your MaraGate account</div>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show mb-3 py-2" role="alert" style="font-size:13px;">
+          {{ message }}
+          <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="POST" action="/login">
+
+        <div class="mb-3">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="email" class="form-control"
+                 placeholder="admin@maranaorok.go.ke" required autocomplete="email">
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label">Password</label>
+          <div class="position-relative">
+            <input type="password" name="password" class="form-control"
+                   id="pwField" placeholder="Enter your password" required>
+            <button type="button" onclick="togglePw()"
+                    style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#aaa;cursor:pointer;">
+              <i class="bi bi-eye" id="eyeIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="remember_me" id="rememberMe">
+            <label class="form-check-label" for="rememberMe" style="font-size:13px;color:#666;">Keep me signed in</label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-signin">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Sign In to MaraGate
+        </button>
+
+      </form>
+
+      <hr style="margin:24px 0;border-color:#eee;">
+
+      <div class="text-center mb-4" style="font-size:13px;color:#888;">
+        New tour guide?
+        <a href="{{ url_for('auth.register') }}" style="color:#2d6a4f;font-weight:600;">Create account</a>
+        &nbsp;|&nbsp;
+        <a href="{{ url_for('auth.home') }}" style="color:#2d6a4f;font-weight:600;">← Home</a>
+      </div>
+
+      <!-- Demo credentials -->
+      <div style="background:#f8fdf9;border:1px solid #d8f3dc;border-radius:12px;padding:16px;">
+        <div style="font-size:11px;font-weight:700;color:#2d6a4f;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">
+          Demo Credentials
+        </div>
+        <div class="d-flex gap-2 flex-wrap mb-2">
+          <span class="role-badge admin" onclick="fillAdmin()">
+            <i class="bi bi-shield-fill"></i> Admin Login
+          </span>
+          <span class="role-badge guide" onclick="fillGuide()">
+            <i class="bi bi-person-fill"></i> Guide Login
+          </span>
+        </div>
+        <div style="font-size:11px;color:#888;" id="credDisplay">
+          Click a role above to auto-fill credentials
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+function togglePw() {
+  const f = document.getElementById('pwField');
+  const i = document.getElementById('eyeIcon');
+  if (f.type === 'password') {
+    f.type = 'text';
+    i.className = 'bi bi-eye-slash';
+  } else {
+    f.type = 'password';
+    i.className = 'bi bi-eye';
+  }
+}
+
+function fillAdmin() {
+  document.querySelector('[name="email"]').value    = 'admin@maranaorok.go.ke';
+  document.querySelector('[name="password"]').value = 'Admin@2024';
+  document.getElementById('credDisplay').innerHTML  =
+    '<strong>Admin:</strong> admin@maranaorok.go.ke / Admin@2024';
+}
+
+function fillGuide() {
+  document.querySelector('[name="email"]').value    = 'guide@example.com';
+  document.querySelector('[name="password"]').value = 'Guide@2024';
+  document.getElementById('credDisplay').innerHTML  =
+    '<strong>Guide:</strong> guide@example.com / Guide@2024';
+}
+</script>
+
+{% endblock %}

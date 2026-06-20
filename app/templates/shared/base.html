@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Mara Ecosystem{% endblock %} — Narok County</title>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="{{ 'admin-skin' if current_user.is_authenticated and current_user.is_admin() else 'guide-skin' }}">
+
+{% if current_user.is_authenticated %}
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon">
+      <i class="bi bi-tree-fill"></i>
+    </div>
+    <div class="brand-text">
+      <span class="brand-title">MaraGate</span>
+      <span class="brand-sub">Narok County</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    {% if current_user.is_admin() %}
+      <a href="{{ url_for('admin.dashboard') }}" class="nav-item {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+        <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+      </a>
+      <a href="{{ url_for('admin.users') }}" class="nav-item {% if 'users' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-people-fill"></i><span>User Management</span>
+      </a>
+      <a href="{{ url_for('admin.clearances') }}" class="nav-item {% if 'clearance' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-pass-fill"></i><span>Gate Clearances</span>
+      </a>
+      <a href="{{ url_for('admin.revenue') }}" class="nav-item {% if 'revenue' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-cash-stack"></i><span>Revenue</span>
+      </a>
+      <a href="{{ url_for('admin.vehicles') }}" class="nav-item {% if request.endpoint == 'admin.vehicles' %}active{% endif %}">
+        <i class="bi bi-truck-front-fill"></i><span>Vehicle Density</span>
+      </a>
+      <a href="{{ url_for('admin.wildlife') }}" class="nav-item {% if 'wildlife' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-geo-alt-fill"></i><span>Wildlife Tracking</span>
+      </a>
+      <a href="{{ url_for('admin.reports') }}" class="nav-item {% if 'report' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-file-earmark-bar-graph-fill"></i><span>Reports</span>
+      </a>
+      <div class="nav-divider"></div>
+      <a href="{{ url_for('admin.alerts') }}" class="nav-item {% if 'alert' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-bell-fill"></i><span>Alerts</span>
+      </a>
+      <a href="{{ url_for('admin.audit_logs') }}" class="nav-item {% if 'audit' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-journal-text"></i><span>Audit Logs</span>
+      </a>
+    {% else %}
+      <a href="{{ url_for('guide.dashboard') }}" class="nav-item {% if request.endpoint == 'guide.dashboard' %}active{% endif %}">
+        <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+      </a>
+      <a href="{{ url_for('guide.vehicles') }}" class="nav-item {% if 'vehicle' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-truck-front-fill"></i><span>My Vehicles</span>
+      </a>
+      <a href="{{ url_for('guide.clearances') }}" class="nav-item {% if 'clearance' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-pass-fill"></i><span>Gate Clearances</span>
+      </a>
+      <a href="{{ url_for('guide.sightings') }}" class="nav-item {% if 'sighting' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-binoculars-fill"></i><span>Wildlife Sightings</span>
+      </a>
+      <a href="{{ url_for('tourist.book') }}" class="nav-item {% if 'tourist' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-ticket-perforated-fill"></i><span>Book Safari</span>
+      </a>
+      <a href="{{ url_for('tourist.my_bookings') }}" class="nav-item {% if 'my_bookings' in request.endpoint %}active{% endif %}">
+        <i class="bi bi-list-check"></i><span>My Bookings</span>
+      </a>
+    {% endif %}
+    <div class="nav-divider"></div>
+    <a href="{{ url_for('auth.profile') }}" class="nav-item {% if request.endpoint == 'auth.profile' %}active{% endif %}">
+      <i class="bi bi-person-circle"></i><span>My Profile</span>
+    </a>
+    <a href="{{ url_for('auth.logout') }}" class="nav-item nav-logout">
+      <i class="bi bi-box-arrow-right"></i><span>Logout</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-user">
+    <div class="user-avatar">
+      {{ current_user.full_name[0].upper() }}
+    </div>
+    <div class="user-info">
+      <div class="user-name">{{ current_user.full_name.split()[0] }}</div>
+      <div class="user-role badge">{{ current_user.role.title() }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content" id="main-content">
+  <!-- Topbar -->
+  <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle">
+      <i class="bi bi-list"></i>
+    </button>
+    <div class="topbar-title">{% block page_title %}{% endblock %}</div>
+    <div class="topbar-actions">
+      {% if current_user.is_admin() %}
+      <span class="badge bg-danger-subtle text-danger me-2" id="pendingBadge" style="display:none">
+        <i class="bi bi-clock-fill"></i> <span id="pendingCount">0</span> Pending
+      </span>
+      {% endif %}
+      <span class="topbar-time" id="topbarTime"></span>
+    </div>
+  </header>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="px-4 pt-3">
+      {% for category, message in messages %}
+      <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show d-flex align-items-center" role="alert">
+        <i class="bi bi-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-triangle{% elif category == 'warning' %}exclamation-circle{% else %}info-circle{% endif %}-fill me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Page Content -->
+  <main class="page-content">
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+{% else %}
+<!-- Public layout (auth pages) -->
+{% block public_content %}{% endblock %}
+{% endif %}
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+<script>
+  // Sidebar toggle
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const sidebar = document.getElementById('sidebar');
+  const mainContent = document.getElementById('main-content');
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
+      mainContent.classList.toggle('expanded');
+    });
+  }
+
+  // Live clock
+  function updateClock() {
+    const el = document.getElementById('topbarTime');
+    if (el) {
+      el.textContent = new Date().toLocaleString('en-KE', {
+        weekday:'short', day:'numeric', month:'short',
+        hour:'2-digit', minute:'2-digit'
+      });
+    }
+  }
+  updateClock();
+  setInterval(updateClock, 60000);
+
+  {% if current_user.is_authenticated and current_user.is_admin() %}
+  // Poll pending clearances
+  async function checkPending() {
+    try {
+      const r = await fetch('/api/v1/dashboard/stats');
+      const d = await r.json();
+      const badge = document.getElementById('pendingBadge');
+      const count = document.getElementById('pendingCount');
+      if (d.pending_clearances > 0) {
+        badge.style.display = '';
+        count.textContent = d.pending_clearances;
+      } else {
+        badge.style.display = 'none';
+      }
+    } catch(e) {}
+  }
+  checkPending();
+  setInterval(checkPending, 60000);
+  {% endif %}
+</script>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

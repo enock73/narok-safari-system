@@ -1,0 +1,133 @@
+{% extends 'shared/base.html' %}
+{% block title %}Clearance Details{% endblock %}
+{% block page_title %}Clearance Details{% endblock %}
+{% block content %}
+<div class="section-header mb-4">
+  <h1 class="section-title">Clearance Request</h1>
+  <a href="{{ url_for('guide.clearances') }}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Back
+  </a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="form-card mb-4">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <span class="status-badge status-{{ clearance.status }} mb-2 d-inline-block">{{ clearance.status.upper() }}</span>
+          <h5 class="mb-0 mt-1">{{ clearance.gate }}</h5>
+          <div class="text-muted small">{{ clearance.entry_date }} · {{ clearance.purpose }}</div>
+        </div>
+        {% if clearance.status == 'approved' %}
+        <a href="{{ url_for('guide.view_qr', clearance_id=clearance.id) }}" class="btn btn-forest btn-sm">
+          <i class="bi bi-qr-code me-1"></i>View QR Code
+        </a>
+        {% endif %}
+      </div>
+
+      <div class="row g-3 small">
+        <div class="col-md-4">
+          <div class="text-muted">Vehicle</div>
+          <div class="fw-semibold">{{ clearance.vehicle.plate_number }} ({{ clearance.vehicle.vehicle_type }})</div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-muted">Passengers</div>
+          <div class="fw-semibold">{{ clearance.passenger_count }} total ({{ clearance.adult_count }} adults, {{ clearance.child_count }} children)</div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-muted">Entry Time</div>
+          <div class="fw-semibold">{{ clearance.entry_time or '—' }}</div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-muted">Citizens</div>
+          <div class="fw-semibold">{{ clearance.citizen_count }}</div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-muted">Non-Citizens</div>
+          <div class="fw-semibold">{{ clearance.non_citizen_count }}</div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-muted">Fee Paid</div>
+          <div class="fw-semibold text-forest">{{ 'KES {:,.0f}'.format(clearance.fee_paid) if clearance.fee_paid else 'Pending' }}</div>
+        </div>
+      </div>
+
+      {% if clearance.notes %}
+      <div class="mt-3 p-3 rounded-3 bg-forest-50">
+        <div class="small text-muted mb-1">Admin Notes:</div>
+        <div class="small">{{ clearance.notes }}</div>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if passengers %}
+    <div class="form-card">
+      <div class="form-section-title">Passenger Manifest</div>
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr><th>#</th><th>Name</th><th>Nationality</th><th>ID/Passport</th><th>Type</th></tr>
+          </thead>
+          <tbody>
+            {% for p in passengers %}
+            <tr>
+              <td class="text-muted">{{ loop.index }}</td>
+              <td>{{ p.full_name }}</td>
+              <td>{{ p.nationality or '—' }}</td>
+              <td><code class="small">{{ p.passport_id or '—' }}</code></td>
+              <td><span class="badge bg-light text-dark border">{{ p.age_group.title() }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- QR Code sidebar -->
+  <div class="col-lg-4">
+    {% if clearance.status == 'approved' and clearance.qr_code_path %}
+    <div class="qr-card">
+      <div class="fw-semibold mb-1">Gate Clearance Token</div>
+      <div class="text-muted small mb-3">Show this QR code at the gate</div>
+      <img src="{{ url_for('static', filename='uploads/qrcodes/' + clearance.qr_code_path) }}"
+           alt="QR Code" class="img-fluid mb-3" style="max-width:220px;border-radius:8px;border:1px solid #e5e7eb;">
+      <div class="qr-token mb-3">{{ clearance.token }}</div>
+      <a href="{{ url_for('static', filename='uploads/qrcodes/' + clearance.qr_code_path) }}"
+         download="clearance_qr_{{ clearance.token[:8] }}.png"
+         class="btn btn-forest w-100 btn-sm">
+        <i class="bi bi-download me-2"></i>Download QR Code
+      </a>
+    </div>
+    {% elif clearance.status == 'pending' %}
+    <div class="form-card text-center">
+      <div class="stat-icon amber mx-auto mb-3">
+        <i class="bi bi-clock-history"></i>
+      </div>
+      <h6>Awaiting Approval</h6>
+      <p class="text-muted small">Your clearance is being reviewed by a county official. You will be notified once approved.</p>
+    </div>
+    {% elif clearance.status == 'rejected' %}
+    <div class="form-card text-center">
+      <div class="stat-icon red mx-auto mb-3"><i class="bi bi-x-circle-fill"></i></div>
+      <h6 class="text-danger">Clearance Rejected</h6>
+      <p class="text-muted small">{{ clearance.notes or 'This clearance request was not approved.' }}</p>
+      <a href="{{ url_for('guide.request_clearance') }}" class="btn btn-forest btn-sm">
+        <i class="bi bi-arrow-repeat me-1"></i>Submit New Request
+      </a>
+    </div>
+    {% endif %}
+
+    <div class="form-card mt-4">
+      <div class="form-section-title">Submission Info</div>
+      <div class="small">
+        <div class="mb-1"><span class="text-muted">Submitted:</span> {{ clearance.created_at.strftime('%d %b %Y %H:%M') }}</div>
+        {% if clearance.approved_at %}
+        <div><span class="text-muted">Processed:</span> {{ clearance.approved_at.strftime('%d %b %Y %H:%M') }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

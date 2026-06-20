@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maasai Mara National Reserve — Book Your Safari | Narok County</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green-dark:  #1a3c2e;
+      --green-mid:   #2d6a4f;
+      --green-light: #52b788;
+      --amber:       #f4a261;
+      --amber-dark:  #e76f51;
+      --gold:        #d4a017;
+      --cream:       #fdf8f0;
+      --text:        #1a1a1a;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',sans-serif; color:var(--text); background:#fff; }
+
+    /* NAVBAR */
+    .navbar { background:rgba(26,60,46,0.97) !important; backdrop-filter:blur(10px); padding:14px 0; position:fixed; inset-block-start:0; inset-inline-start:0; inset-inline-end:0; z-index:1000; }
+    .navbar-brand { font-family:'Playfair Display',serif; font-size:22px; color:#fff !important; display:flex; align-items:center; gap:10px; }
+    .navbar-brand .logo-icon { inline-size:38px; block-size:38px; background:var(--amber); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:18px; color:var(--green-dark); }
+    .nav-link { color:rgba(255,255,255,0.85) !important; font-size:14px; font-weight:500; }
+    .nav-link:hover { color:var(--amber) !important; }
+    .btn-book { background:var(--amber); color:var(--green-dark) !important; font-weight:600; border-radius:25px; padding:8px 22px !important; }
+    .btn-book:hover { background:var(--amber-dark); color:#fff !important; }
+
+    /* HERO */
+    .hero { min-block-size:100vh; background:linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(26,60,46,0.7) 100%), url('https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1600&q=80') center/cover no-repeat; display:flex; align-items:center; justify-content:center; text-align:center; padding:120px 20px 80px; }
+    .hero-badge { display:inline-block; background:var(--amber); color:var(--green-dark); font-size:12px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:6px 18px; border-radius:20px; margin-block-end:20px; }
+    .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(38px,6vw,72px); color:#fff; line-height:1.15; margin-block-end:20px; text-shadow:0 2px 20px rgba(0,0,0,0.4); }
+    .hero p { font-size:18px; color:rgba(255,255,255,0.88); max-inline-size:600px; margin:0 auto 40px; line-height:1.7; }
+    .hero-btns { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+    .btn-hero-primary { background:var(--amber); color:var(--green-dark); font-weight:700; font-size:16px; padding:14px 36px; border-radius:50px; border:none; text-decoration:none; transition:all .2s; display:inline-flex; align-items:center; gap:8px; }
+    .btn-hero-primary:hover { background:var(--amber-dark); color:#fff; transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.3); }
+    .btn-hero-secondary { background:transparent; color:#fff; font-weight:600; font-size:16px; padding:14px 36px; border-radius:50px; border:2px solid rgba(255,255,255,0.6); text-decoration:none; transition:all .2s; display:inline-flex; align-items:center; gap:8px; }
+    .btn-hero-secondary:hover { border-color:#fff; background:rgba(255,255,255,0.1); color:#fff; }
+
+    /* STATS */
+    .stats-bar { background:var(--green-dark); padding:24px 0; }
+    .stat-item { text-align:center; }
+    .stat-num { font-family:'Playfair Display',serif; font-size:32px; color:var(--amber); font-weight:700; }
+    .stat-label { font-size:13px; color:rgba(255,255,255,0.7); margin-block-start:2px; }
+
+    /* SECTIONS */
+    .section-badge { display:inline-block; background:rgba(82,183,136,0.15); color:var(--green-mid); font-size:12px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:5px 16px; border-radius:20px; margin-block-end:12px; }
+    .section-title { font-family:'Playfair Display',serif; font-size:clamp(28px,4vw,42px); color:var(--green-dark); line-height:1.2; }
+    .section-sub { font-size:16px; color:#555; max-inline-size:600px; margin:12px auto 0; line-height:1.7; }
+
+    /* HOW IT WORKS */
+    .how-it-works { background:var(--cream); padding:80px 0; }
+    .step-card { background:#fff; border-radius:16px; padding:32px 24px; text-align:center; border:1px solid #e8f4ec; block-size:100%; transition:transform .2s, box-shadow .2s; }
+    .step-card:hover { transform:translateY(-4px); box-shadow:0 12px 32px rgba(45,106,79,0.12); }
+    .step-num { inline-size:52px; block-size:52px; background:var(--green-mid); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:22px; font-weight:700; margin:0 auto 16px; }
+    .step-icon { font-size:36px; margin-block-end:14px; display:block; }
+    .step-card h5 { font-family:'Playfair Display',serif; font-size:18px; color:var(--green-dark); margin-block-end:10px; }
+    .step-card p { font-size:14px; color:#666; line-height:1.6; }
+
+    /* VEHICLES — normal real-world card sizing */
+    .vehicles-section { background:var(--cream); padding:80px 0; }
+    .vehicle-card {
+      background:#fff;
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid #e8f4ec;
+      transition:transform .2s, box-shadow .2s;
+      block-size:100%;
+      display:flex;
+      flex-direction:column;
+    }
+    .vehicle-card:hover { transform:translateY(-4px); box-shadow:0 12px 32px rgba(45,106,79,0.14); }
+    .vehicle-photo-wrap {
+      inline-size:100%;
+      aspect-ratio: 4 / 3;
+      overflow:hidden;
+      background:#eef6f0;
+    }
+    .vehicle-photo-wrap img {
+      inline-size:100%;
+      block-size:100%;
+      object-fit:cover;
+      object-position:center;
+      display:block;
+    }
+    .vehicle-body { padding:18px 20px 20px; flex:1; display:flex; flex-direction:column; }
+    .vehicle-name { font-family:'Playfair Display',serif; font-size:17px; color:var(--green-dark); margin-block-end:8px; }
+    .vehicle-feat { display:flex; gap:6px; flex-wrap:wrap; margin-block-end:12px; }
+    .feat-pill { background:#f0faf2; color:var(--green-mid); font-size:10.5px; font-weight:600; padding:3px 9px; border-radius:12px; white-space:nowrap; }
+    .vehicle-price { font-size:18px; font-weight:700; color:var(--amber-dark); margin-block-start:auto; }
+    .vehicle-price span { font-size:11px; color:#999; font-weight:400; }
+    .vehicle-note { font-size:11px; color:#888; margin-block-start:4px; }
+
+    /* BOOKING FORM */
+    .booking-section { padding:80px 0; }
+    .booking-card { background:var(--green-dark); border-radius:24px; overflow:hidden; }
+    .booking-left { padding:48px 40px; background:linear-gradient(135deg, var(--green-dark), var(--green-mid)); }
+    .booking-left h2 { font-family:'Playfair Display',serif; font-size:36px; color:#fff; margin-block-end:16px; }
+    .booking-left p { color:rgba(255,255,255,0.8); line-height:1.7; margin-block-end:24px; }
+    .booking-feature { display:flex; align-items:center; gap:12px; margin-block-end:14px; }
+    .booking-feature i { color:var(--amber); font-size:18px; }
+    .booking-feature span { color:rgba(255,255,255,0.85); font-size:14px; }
+    .booking-right { padding:48px 40px; background:#fff; }
+    .booking-right h3 { font-family:'Playfair Display',serif; font-size:24px; color:var(--green-dark); margin-block-end:24px; }
+    .form-control, .form-select { border-color:#ddd; padding:12px 16px; font-size:14px; border-radius:10px; }
+    .form-control:focus, .form-select:focus { border-color:var(--green-light); box-shadow:0 0 0 3px rgba(82,183,136,0.15); }
+    .form-label { font-size:13px; font-weight:600; color:#444; margin-block-end:6px; }
+    .btn-book-now { background:var(--green-mid); color:#fff; font-weight:700; font-size:16px; padding:14px; border-radius:12px; border:none; inline-size:100%; transition:all .2s; }
+    .btn-book-now:hover { background:var(--green-dark); transform:translateY(-1px); }
+
+    /* WILDLIFE */
+    .wildlife-section { background:var(--cream); padding:80px 0; }
+    .wildlife-card { background:#fff; border-radius:16px; padding:24px; text-align:center; border:1px solid #e8f4ec; transition:transform .2s; }
+    .wildlife-card:hover { transform:translateY(-4px); }
+    .wildlife-icon { font-size:48px; margin-block-end:12px; display:block; }
+    .wildlife-card h6 { font-family:'Playfair Display',serif; font-size:16px; color:var(--green-dark); margin-block-end:6px; }
+    .wildlife-card p { font-size:12px; color:#888; }
+
+    /* TESTIMONIALS */
+    .testimonials { padding:80px 0; }
+    .testi-card { background:var(--cream); border-radius:16px; padding:28px; border-inline-start:4px solid var(--amber); block-size:100%; }
+    .testi-stars { color:var(--gold); margin-block-end:12px; }
+    .testi-text { font-size:15px; color:#444; line-height:1.7; margin-block-end:16px; font-style:italic; }
+    .testi-author { font-weight:600; font-size:14px; color:var(--green-dark); }
+    .testi-country { font-size:12px; color:#888; }
+
+    /* FOOTER */
+    .footer { background:var(--green-dark); padding:60px 0 30px; color:rgba(255,255,255,0.75); }
+    .footer-logo { font-family:'Playfair Display',serif; font-size:22px; color:#fff; margin-block-end:12px; }
+    .footer h6 { color:var(--amber); font-size:12px; letter-spacing:0.1em; text-transform:uppercase; margin-block-end:16px; }
+    .footer-link { display:block; color:rgba(255,255,255,0.65); font-size:14px; text-decoration:none; margin-block-end:8px; transition:color .2s; }
+    .footer-link:hover { color:var(--amber); }
+    .footer-divider { border-color:rgba(255,255,255,0.1); margin:36px 0 24px; }
+    .footer-bottom { font-size:13px; color:rgba(255,255,255,0.5); text-align:center; }
+
+    .fade-up { opacity:0; transform:translateY(30px); transition:all .6s ease; }
+    .fade-up.visible { opacity:1; transform:translateY(0); }
+
+    @media (max-inline-size: 576px) {
+      .vehicle-photo-wrap { aspect-ratio: 16 / 10; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <div class="logo-icon">🌿</div>
+      <div>
+        <div style="line-height:1.1;">Maasai Mara</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.6);font-family:'Inter',sans-serif;font-weight:400;">National Reserve</div>
+      </div>
+    </a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+      <span style="color:#fff;font-size:22px;"><i class="bi bi-list"></i></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav mx-auto gap-2">
+        <li class="nav-item"><a class="nav-link" href="#how-it-works">How It Works</a></li>
+        <li class="nav-item"><a class="nav-link" href="#vehicles">Vehicles</a></li>
+        <li class="nav-item"><a class="nav-link" href="#wildlife">Wildlife</a></li>
+        <li class="nav-item"><a class="nav-link" href="#book">Book Now</a></li>
+      </ul>
+      <div class="d-flex gap-2 align-items-center mt-3 mt-lg-0">
+        <a href="/login" class="nav-link px-3">Sign In</a>
+        <a href="/register" class="nav-link btn-book px-4">Register</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">🌍 UNESCO World Heritage Ecosystem</div>
+    <h1>Experience the Magic of<br>Maasai Mara</h1>
+    <p>Book your official safari gate clearance, choose your guide's vehicle, and discover Africa's most iconic wildlife reserve — managed by Narok County Government.</p>
+    <div class="hero-btns">
+      <a href="/register" class="btn-hero-primary">
+        <i class="bi bi-ticket-perforated-fill"></i> Book Safari Ticket
+      </a>
+      <a href="#how-it-works" class="btn-hero-secondary">
+        <i class="bi bi-play-circle"></i> How It Works
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-bar">
+  <div class="container">
+    <div class="row g-3 text-center">
+      <div class="col-6 col-md-3 stat-item"><div class="stat-num">1.5M+</div><div class="stat-label">Annual Visitors</div></div>
+      <div class="col-6 col-md-3 stat-item"><div class="stat-num">1,510</div><div class="stat-label">Square Kilometres</div></div>
+      <div class="col-6 col-md-3 stat-item"><div class="stat-num">95+</div><div class="stat-label">Wildlife Species</div></div>
+      <div class="col-6 col-md-3 stat-item"><div class="stat-num">6</div><div class="stat-label">Entry Gates</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works" id="how-it-works">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-badge">Simple Process</div>
+      <h2 class="section-title">How to Book Your Safari</h2>
+      <p class="section-sub">Get your official gate clearance ticket in 4 easy steps — fully digital, secure, and instant.</p>
+    </div>
+    <div class="row g-4 mt-4">
+      <div class="col-md-6 col-lg-3 fade-up">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <span class="step-icon">👤</span>
+          <h5>Create Account</h5>
+          <p>Register as a tour guide with your name, ID, and KWS licence number. Takes 2 minutes.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 fade-up">
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <span class="step-icon">🚙</span>
+          <h5>Register Vehicle</h5>
+          <p>Add your safari vehicle — Land Cruiser, Land Rover, Minivan — with plate number and insurance details.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 fade-up">
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <span class="step-icon">🎫</span>
+          <h5>Request Ticket</h5>
+          <p>Select your gate, entry date, add all passengers, and submit your gate clearance request.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 fade-up">
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <span class="step-icon">📱</span>
+          <h5>Get QR Code</h5>
+          <p>Once approved by the county office, download your QR code ticket and present it at the gate.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VEHICLES — actual guide vehicles, normal size cards -->
+<section class="vehicles-section" id="vehicles">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-badge">Safari Fleet</div>
+      <h2 class="section-title">Vehicles Used by Our Guides</h2>
+      <p class="section-sub">These are the actual safari vehicles registered and verified by Narok County Government, driven by our licensed tour guides.</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+
+      <!-- Toyota Land Cruiser 76 -->
+      <div class="col-sm-6 col-lg-3 fade-up">
+        <div class="vehicle-card">
+          <div class="vehicle-photo-wrap">
+            <img src="/static/images/vehicles/toyota_land_cruiser_76.jpg"
+                 alt="Toyota Land Cruiser 76 — safari vehicle used by Maasai Mara guides">
+          </div>
+          <div class="vehicle-body">
+            <div class="vehicle-name">Toyota Land Cruiser 76</div>
+            <div class="vehicle-feat">
+              <span class="feat-pill"><i class="bi bi-people-fill me-1"></i>8 Pax</span>
+              <span class="feat-pill">Pop-up Roof</span>
+              <span class="feat-pill">4×4</span>
+            </div>
+            <div class="vehicle-price">KES 8,500 <span>/ day</span></div>
+            <div class="vehicle-note">Most popular safari vehicle in Kenya</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Land Rover Defender 110 -->
+      <div class="col-sm-6 col-lg-3 fade-up">
+        <div class="vehicle-card">
+          <div class="vehicle-photo-wrap">
+            <img src="/static/images/vehicles/land_rover_defender_110.jpg"
+                 alt="Land Rover Defender 110 — safari vehicle used by Maasai Mara guides">
+          </div>
+          <div class="vehicle-body">
+            <div class="vehicle-name">Land Rover Defender 110</div>
+            <div class="vehicle-feat">
+              <span class="feat-pill"><i class="bi bi-people-fill me-1"></i>9 Pax</span>
+              <span class="feat-pill">Roof Rack</span>
+              <span class="feat-pill">4×4</span>
+            </div>
+            <div class="vehicle-price">KES 9,500 <span>/ day</span></div>
+            <div class="vehicle-note">Ideal for photography safaris</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toyota Hiace Safari Van -->
+      <div class="col-sm-6 col-lg-3 fade-up">
+        <div class="vehicle-card">
+          <div class="vehicle-photo-wrap">
+            <img src="/static/images/vehicles/toyota_hiace_safari_van.jpg"
+                 alt="Toyota Hiace safari van — group vehicle used by Maasai Mara guides">
+          </div>
+          <div class="vehicle-body">
+            <div class="vehicle-name">Toyota Hiace Safari Van</div>
+            <div class="vehicle-feat">
+              <span class="feat-pill"><i class="bi bi-people-fill me-1"></i>14 Pax</span>
+              <span class="feat-pill">Pop-up Roof</span>
+              <span class="feat-pill">Air-Con</span>
+            </div>
+            <div class="vehicle-price">KES 12,000 <span>/ day</span></div>
+            <div class="vehicle-note">Best for family &amp; group tours</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hot Air Balloon Safari -->
+      <div class="col-sm-6 col-lg-3 fade-up">
+        <div class="vehicle-card">
+          <div class="vehicle-photo-wrap">
+            <img src="/static/images/vehicles/hot_air_balloon_safari.jpg"
+                 alt="Hot air balloon safari over the Maasai Mara migration">
+          </div>
+          <div class="vehicle-body">
+            <div class="vehicle-name">Hot Air Balloon Safari</div>
+            <div class="vehicle-feat">
+              <span class="feat-pill"><i class="bi bi-people-fill me-1"></i>16 Pax</span>
+              <span class="feat-pill">Sunrise</span>
+              <span class="feat-pill">Premium</span>
+            </div>
+            <div class="vehicle-price">KES 12,550 <span>/ person</span></div>
+            <div class="vehicle-note">Champagne bush breakfast included</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="text-center mt-5">
+      <a href="/register" class="btn-hero-primary" style="text-decoration:none;display:inline-flex;">
+        <i class="bi bi-truck-front-fill"></i> Register &amp; Choose Your Vehicle
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING FORM -->
+<section class="booking-section" id="book">
+  <div class="container">
+    <div class="booking-card">
+      <div class="row g-0">
+        <div class="col-lg-5">
+          <div class="booking-left">
+            <h2>Book Your Safari Today</h2>
+            <p>Register your account, add your vehicle, and request your official gate clearance ticket. Approved by Narok County in minutes.</p>
+            <div class="booking-feature"><i class="bi bi-shield-check-fill"></i><span>Official government-issued clearance ticket</span></div>
+            <div class="booking-feature"><i class="bi bi-qr-code"></i><span>Digital QR code — no paper needed</span></div>
+            <div class="booking-feature"><i class="bi bi-clock-fill"></i><span>Approved within minutes by county officials</span></div>
+            <div class="booking-feature"><i class="bi bi-geo-alt-fill"></i><span>Valid at all 6 Maasai Mara gates</span></div>
+            <div class="booking-feature"><i class="bi bi-people-fill"></i><span>Add all your passengers to the manifest</span></div>
+            <div class="booking-feature"><i class="bi bi-phone-fill"></i><span>Pay via M-Pesa, Cash or Card at gate</span></div>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="booking-right">
+            <h3>Start Your Booking</h3>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Your Full Name</label>
+                <input type="text" class="form-control" placeholder="John Kipchoge" id="bName">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-control" placeholder="john@example.com" id="bEmail">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Entry Gate</label>
+                <select class="form-select" id="bGate">
+                  <option value="">Select gate...</option>
+                  <option>Sekenani Gate</option>
+                  <option>Talek Gate</option>
+                  <option>Musiara Gate</option>
+                  <option>Oloololo Gate</option>
+                  <option>Sand River Gate</option>
+                  <option>Ololaimutia Gate</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Entry Date</label>
+                <input type="date" class="form-control" id="bDate">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Number of Adults</label>
+                <input type="number" class="form-control" min="1" max="20" value="2" id="bAdults">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Vehicle Type</label>
+                <select class="form-select" id="bVehicle">
+                  <option value="">Select vehicle...</option>
+                  <option>Land Cruiser</option>
+                  <option>Land Rover</option>
+                  <option>Minivan</option>
+                  <option>Balloon Safari</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <div class="p-3 rounded-3" style="background:#f0faf2;border:1px solid #d8f3dc;">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span style="font-size:13px;color:#555;">Estimated Entry Fee:</span>
+                    <span style="font-weight:700;color:#2d6a4f;font-size:18px;" id="feeDisplay">KES 0</span>
+                  </div>
+                  <div style="font-size:11px;color:#888;margin-block-start:4px;">Citizens KES 215 | Non-Citizens KES 10,400 | Vehicle KES 350</div>
+                </div>
+              </div>
+              <div class="col-12">
+                <button class="btn-book-now" onclick="proceedToRegister()">
+                  <i class="bi bi-ticket-perforated-fill me-2"></i>
+                  Continue to Register &amp; Book
+                </button>
+              </div>
+              <div class="col-12 text-center">
+                <span style="font-size:13px;color:#888;">Already have an account?
+                  <a href="/login" style="color:var(--green-mid);font-weight:600;">Sign in here</a>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WILDLIFE -->
+<section class="wildlife-section" id="wildlife">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-badge">The Big Five &amp; More</div>
+      <h2 class="section-title">Wildlife You Will See</h2>
+      <p class="section-sub">The Maasai Mara is home to the greatest concentration of wildlife in Africa.</p>
+    </div>
+    <div class="row g-3">
+      {% for animal in [
+        ('🦁','Lion','Panthera leo','Big Five'),
+        ('🐘','Elephant','Loxodonta africana','Big Five'),
+        ('🦏','Rhino','Diceros bicornis','Big Five'),
+        ('🦛','Buffalo','Syncerus caffer','Big Five'),
+        ('🐆','Leopard','Panthera pardus','Big Five'),
+        ('🦓','Zebra','Equus quagga','Plains Game'),
+        ('🦒','Giraffe','Giraffa camelopardalis','Plains Game'),
+        ('🦌','Wildebeest','Connochaetes taurinus','Migration'),
+        ('🐊','Crocodile','Crocodylus niloticus','Reptile'),
+        ('🐆','Cheetah','Acinonyx jubatus','Predator'),
+        ('🦛','Hippo','Hippopotamus amphibius','Water'),
+        ('🦅','Martial Eagle','Polemaetus bellicosus','Bird'),
+      ] %}
+      <div class="col-6 col-md-4 col-lg-2 fade-up">
+        <div class="wildlife-card">
+          <span class="wildlife-icon">{{ animal[0] }}</span>
+          <h6>{{ animal[1] }}</h6>
+          <p>{{ animal[3] }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-badge">Visitor Reviews</div>
+      <h2 class="section-title">What Visitors Say</h2>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4 fade-up">
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">"The digital booking system made everything so smooth. We got our QR code within an hour and walked straight through the gate. Incredible system!"</p>
+          <div class="testi-author">Sarah Mitchell</div>
+          <div class="testi-country">🇬🇧 United Kingdom</div>
+        </div>
+      </div>
+      <div class="col-md-4 fade-up">
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">"Saw the Great Migration crossing! The guide's vehicle was registered and verified. Professional system — very impressed with Narok County."</p>
+          <div class="testi-author">Jean-Pierre Dubois</div>
+          <div class="testi-country">🇫🇷 France</div>
+        </div>
+      </div>
+      <div class="col-md-4 fade-up">
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">"As a Kenyan citizen I love how easy it is now. Register online, get your digital clearance, and enjoy the Mara. Brilliant work by the county!"</p>
+          <div class="testi-author">Aisha Kamau</div>
+          <div class="testi-country">🇰🇪 Kenya</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GATES INFO -->
+<section style="background:var(--green-dark);padding:60px 0;">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="section-badge" style="background:rgba(244,162,97,0.2);color:var(--amber);">Entry Points</div>
+      <h2 class="section-title" style="color:#fff;">6 Official Entry Gates</h2>
+    </div>
+    <div class="row g-3">
+      {% for gate in [
+        ('Sekenani Gate','Main southern entrance, Narok road','06:00 – 18:00'),
+        ('Talek Gate','Eastern entrance near Talek River','06:00 – 18:00'),
+        ('Musiara Gate','Northern entrance, Mara Triangle','06:00 – 18:00'),
+        ('Oloololo Gate','Western escarpment entrance','06:00 – 18:00'),
+        ('Sand River Gate','Southern border with Tanzania','06:00 – 18:00'),
+        ('Ololaimutia Gate','South-eastern entrance','06:00 – 18:00'),
+      ] %}
+      <div class="col-md-6 col-lg-4">
+        <div style="background:rgba(255,255,255,0.08);border-radius:14px;padding:20px;border:1px solid rgba(255,255,255,0.1);">
+          <div style="display:flex;align-items:center;gap:10px;margin-block-end:8px;">
+            <i class="bi bi-geo-fill" style="color:var(--amber);font-size:18px;"></i>
+            <span style="color:#fff;font-weight:600;font-size:15px;">{{ gate[0] }}</span>
+          </div>
+          <div style="color:rgba(255,255,255,0.65);font-size:13px;margin-block-end:4px;">{{ gate[1] }}</div>
+          <div style="color:var(--amber);font-size:12px;font-weight:600;">
+            <i class="bi bi-clock me-1"></i>{{ gate[2] }}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="footer-logo">🌿 Maasai Mara Reserve</div>
+        <p style="font-size:14px;line-height:1.7;margin-block-end:20px;">
+          Official gate clearance and ecosystem management system for the Maasai Mara National Reserve, managed by Narok County Government.
+        </p>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);">
+          <i class="bi bi-geo-alt me-1"></i> Narok County, Kenya
+        </div>
+      </div>
+      <div class="col-md-4 col-lg-2">
+        <h6>Quick Links</h6>
+        <a href="#how-it-works" class="footer-link">How It Works</a>
+        <a href="#vehicles" class="footer-link">Vehicles</a>
+        <a href="#wildlife" class="footer-link">Wildlife</a>
+        <a href="#book" class="footer-link">Book Now</a>
+      </div>
+      <div class="col-md-4 col-lg-2">
+        <h6>Account</h6>
+        <a href="/register" class="footer-link">Register</a>
+        <a href="/login" class="footer-link">Sign In</a>
+        <a href="/safari/book" class="footer-link">Book Safari</a>
+        <a href="/guide/sightings" class="footer-link">Report Sighting</a>
+      </div>
+      <div class="col-md-4 col-lg-4">
+        <h6>Entry Fee Schedule</h6>
+        <table style="inline-size:100%;font-size:13px;">
+          <tr><td style="color:rgba(255,255,255,0.65);padding:3px 0;">Kenyan Adult Citizen</td><td style="color:var(--amber);text-align:end;font-weight:600;">KES 215</td></tr>
+          <tr><td style="color:rgba(255,255,255,0.65);padding:3px 0;">Kenyan Child Citizen</td><td style="color:var(--amber);text-align:end;font-weight:600;">KES 105</td></tr>
+          <tr><td style="color:rgba(255,255,255,0.65);padding:3px 0;">Non-Citizen Adult</td><td style="color:var(--amber);text-align:end;font-weight:600;">USD 80</td></tr>
+          <tr><td style="color:rgba(255,255,255,0.65);padding:3px 0;">Non-Citizen Child</td><td style="color:var(--amber);text-align:end;font-weight:600;">USD 45</td></tr>
+          <tr><td style="color:rgba(255,255,255,0.65);padding:3px 0;">Vehicle Fee</td><td style="color:var(--amber);text-align:end;font-weight:600;">KES 350</td></tr>
+        </table>
+      </div>
+    </div>
+    <hr class="footer-divider">
+    <div class="footer-bottom">
+      © 2024 Narok County Government — Maasai Mara Ecosystem Management System.
+      All rights reserved. | Powered by MaraGate |
+      Kimutai Enock  Tell +254769330475
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.getElementById('bAdults').addEventListener('input', calcFee);
+function calcFee() {
+  const adults = parseInt(document.getElementById('bAdults').value) || 0;
+  const fee = (adults * 215) + 350;
+  document.getElementById('feeDisplay').textContent = 'KES ' + fee.toLocaleString();
+}
+
+function proceedToRegister() {
+  const name  = document.getElementById('bName').value;
+  const email = document.getElementById('bEmail').value;
+  const gate  = document.getElementById('bGate').value;
+  const date  = document.getElementById('bDate').value;
+  if (!name || !email) {
+    alert('Please enter your name and email first.');
+    return;
+  }
+  sessionStorage.setItem('bookingName',  name);
+  sessionStorage.setItem('bookingEmail', email);
+  sessionStorage.setItem('bookingGate',  gate);
+  sessionStorage.setItem('bookingDate',  date);
+  window.location.href = '/safari/book';
+}
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+document.getElementById('bDate').min = new Date().toISOString().split('T')[0];
+calcFee();
+</script>
+</body>
+</html>

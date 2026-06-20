@@ -1,0 +1,88 @@
+{% extends 'shared/base.html' %}
+{% block title %}My Vehicles{% endblock %}
+{% block page_title %}My Vehicles{% endblock %}
+{% block content %}
+<div class="section-header mb-4">
+  <h1 class="section-title">My Vehicles</h1>
+  <a href="{{ url_for('guide.register_vehicle') }}" class="btn btn-forest">
+    <i class="bi bi-plus-circle me-2"></i>Register Vehicle
+  </a>
+</div>
+
+{% if vehicles %}
+<div class="row g-4">
+  {% for v in vehicles %}
+  <div class="col-md-6 col-lg-4">
+    <div class="form-card">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <span class="badge bg-light text-dark border fs-6 fw-bold">{{ v.plate_number }}</span>
+          <div class="text-muted small mt-1">{{ v.vehicle_type }}</div>
+        </div>
+        <span class="badge bg-{{ 'success' if v.is_active else 'secondary' }}-subtle text-{{ 'success' if v.is_active else 'secondary' }}">
+          {{ 'Active' if v.is_active else 'Inactive' }}
+        </span>
+      </div>
+
+      <div class="row g-2 small mb-3">
+        <div class="col-6">
+          <div class="text-muted">Make/Model</div>
+          <div class="fw-semibold">{{ v.make or '—' }} {{ v.model or '' }}</div>
+        </div>
+        <div class="col-6">
+          <div class="text-muted">Year</div>
+          <div class="fw-semibold">{{ v.year or '—' }}</div>
+        </div>
+        <div class="col-6">
+          <div class="text-muted">Colour</div>
+          <div class="fw-semibold">{{ v.color or '—' }}</div>
+        </div>
+        <div class="col-6">
+          <div class="text-muted">Capacity</div>
+          <div class="fw-semibold">{{ v.capacity }} passengers</div>
+        </div>
+        <div class="col-12">
+          <div class="text-muted">Insurance No.</div>
+          <div class="fw-semibold">{{ v.insurance_number or '—' }}</div>
+        </div>
+        {% if v.insurance_expiry %}
+        <div class="col-12">
+          <div class="text-muted">Insurance Expiry</div>
+          <div class="fw-semibold {% if v.insurance_expiry < today %}text-danger{% endif %}">
+            {{ v.insurance_expiry }}
+            {% if v.insurance_expiry < today %}
+            <span class="badge bg-danger-subtle text-danger ms-1">Expired</span>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="d-flex gap-2">
+        <a href="{{ url_for('guide.request_clearance') }}" class="btn btn-forest btn-sm flex-grow-1">
+          <i class="bi bi-pass me-1"></i>Request Clearance
+        </a>
+        {% if v.is_active %}
+        <form method="POST" action="{{ url_for('guide.delete_vehicle', vehicle_id=v.id) }}"
+              onsubmit="return confirm('Remove this vehicle?')">
+          <button type="submit" class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-trash3"></i>
+          </button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="form-card text-center py-5">
+  <i class="bi bi-truck display-4 text-muted d-block mb-3"></i>
+  <h5 class="text-muted">No Vehicles Registered</h5>
+  <p class="text-muted small">Register your safari vehicle to request gate clearances.</p>
+  <a href="{{ url_for('guide.register_vehicle') }}" class="btn btn-forest">
+    <i class="bi bi-plus-circle me-2"></i>Register Your First Vehicle
+  </a>
+</div>
+{% endif %}
+{% endblock %}
