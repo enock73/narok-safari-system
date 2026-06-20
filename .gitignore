@@ -1,0 +1,76 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Flask instance folder
+instance/
+
+# Environment variables and secrets
+.env
+.env.*
+*.env
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# Uploaded files (optional)
+uploads/
+
+# Pytest cache
+.pytest_cache/
+
+# Coverage reports
+.coverage
+htmlcov/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build files
+build/
+dist/
+*.egg-info/
+
+# mypy
+.mypy_cache/
+
+# pyright
+.pyright/
+
+# Temporary files
+*.tmp
+*.bak
+
+# Node modules (if using npm for frontend assets)
+node_modules/
+
+# Flask session files
+flask_session/
+
+# Static cache (optional)
+static/cache/
+
+# Ignore local configuration files
+config_local.py
