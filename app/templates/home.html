@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Maasai Mara National Reserve — Book Your Safari Ride | Narok County</title>
+  <title>Maasai Mara National Reserve — Book Your Safari | Narok County</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -334,7 +334,7 @@
               <span class="feat-pill">Sunrise</span>
               <span class="feat-pill">Premium</span>
             </div>
-            <div class="vehicle-price">KES 12,550 <span>/ person</span></div>
+            <div class="vehicle-price">USD 450 <span>/ person</span></div>
             <div class="vehicle-note">Champagne bush breakfast included</div>
           </div>
         </div>
@@ -447,24 +447,28 @@
     </div>
     <div class="row g-3">
       {% for animal in [
-        ('🦁','Lion','Panthera leo','Big Five'),
-        ('🐘','Elephant','Loxodonta africana','Big Five'),
-        ('🦏','Rhino','Diceros bicornis','Big Five'),
-        ('🦛','Buffalo','Syncerus caffer','Big Five'),
-        ('🐆','Leopard','Panthera pardus','Big Five'),
-        ('🦓','Zebra','Equus quagga','Plains Game'),
-        ('🦒','Giraffe','Giraffa camelopardalis','Plains Game'),
-        ('🦌','Wildebeest','Connochaetes taurinus','Migration'),
-        ('🐊','Crocodile','Crocodylus niloticus','Reptile'),
-        ('🐆','Cheetah','Acinonyx jubatus','Predator'),
-        ('🦛','Hippo','Hippopotamus amphibius','Water'),
-        ('🦅','Martial Eagle','Polemaetus bellicosus','Bird'),
+        ('/static/images/wildlife/lion.jpg','Lion','Panthera leo','Big Five'),
+        ('/static/images/wildlife/elephant.jpg','Elephant','Loxodonta africana','Big Five'),
+        ('/static/images/wildlife/black_rhino.jpg','Black Rhino','Diceros bicornis','Big Five'),
+        ('/static/images/wildlife/buffalo.jpg','Buffalo','Syncerus caffer','Big Five'),
+        ('/static/images/wildlife/cheetah.jpg','Cheetah','Acinonyx jubatus','Predator'),
+        ('/static/images/wildlife/zebra.jpg','Zebra','Equus quagga','Plains Game'),
+        ('/static/images/wildlife/giraffe.jpg','Giraffe','Giraffa tippelskirchi','Plains Game'),
+        ('/static/images/wildlife/wildebeest.jpg','Wildebeest','Connochaetes taurinus','Migration'),
+        ('/static/images/wildlife/hippo.jpg','Hippo','Hippopotamus amphibius','Water'),
+        ('/static/images/wildlife/martial_eagle.jpg','Martial Eagle','Polemaetus bellicosus','Bird'),
       ] %}
       <div class="col-6 col-md-4 col-lg-2 fade-up">
-        <div class="wildlife-card">
-          <span class="wildlife-icon">{{ animal[0] }}</span>
-          <h6>{{ animal[1] }}</h6>
-          <p>{{ animal[3] }}</p>
+        <div class="wildlife-card" style="padding:0;overflow:hidden;">
+          <div style="inline-size:100%;aspect-ratio:1/1;overflow:hidden;background:#eef6f0;">
+            <img src="{{ animal[0] }}" alt="{{ animal[1] }} — {{ animal[2] }}, Maasai Mara"
+                 style="inline-size:100%;block-size:100%;object-fit:cover;display:block;">
+          </div>
+          <div style="padding:14px 10px;">
+            <h6 style="margin-block-end:2px;">{{ animal[1] }}</h6>
+            <p style="font-style:italic;font-size:11px;margin-block-end:2px;">{{ animal[2] }}</p>
+            <p>{{ animal[3] }}</p>
+          </div>
         </div>
       </div>
       {% endfor %}
@@ -582,8 +586,7 @@
     <hr class="footer-divider">
     <div class="footer-bottom">
       © 2024 Narok County Government — Maasai Mara Ecosystem Management System.
-      All rights reserved. | Powered by MaraGate |
-      Kimutai Enock  Tell +254769330475
+      All rights reserved. | Powered by MaraGate | Enock Kimutai, Tell +254769330475, Software Engineer at Narok County IT Department.
     </div>
   </div>
 </footer>
