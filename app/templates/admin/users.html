@@ -76,6 +76,7 @@
             <div class="d-flex gap-1">
               {% if not u.is_verified %}
               <form method="POST" action="{{ url_for('admin.verify_user', user_id=u.id) }}" class="d-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <button class="btn btn-xs btn-success py-0 px-2" title="Verify">
                   <i class="bi bi-patch-check" style="font-size:12px;"></i>
                 </button>
@@ -83,6 +84,7 @@
               {% endif %}
               <form method="POST" action="{{ url_for('admin.toggle_user', user_id=u.id) }}" class="d-inline"
                     onsubmit="return confirm('Toggle user status?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <button class="btn btn-xs btn-{{ 'warning' if u.is_active else 'outline-success' }} py-0 px-2"
                         title="{{ 'Suspend' if u.is_active else 'Activate' }}"
                         {% if u.id == current_user.id %}disabled{% endif %}>

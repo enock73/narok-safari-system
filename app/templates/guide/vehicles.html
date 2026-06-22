@@ -65,6 +65,7 @@
         {% if v.is_active %}
         <form method="POST" action="{{ url_for('guide.delete_vehicle', vehicle_id=v.id) }}"
               onsubmit="return confirm('Remove this vehicle?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <button type="submit" class="btn btn-outline-danger btn-sm">
             <i class="bi bi-trash3"></i>
           </button>

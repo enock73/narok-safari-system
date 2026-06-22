@@ -27,6 +27,7 @@
   <!-- Payment Form -->
   <div class="col-lg-7">
     <form method="POST" action="{{ url_for('tourist.book_payment') }}" id="payForm">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
       <!-- Payment Method -->
       <div class="form-card mb-4">

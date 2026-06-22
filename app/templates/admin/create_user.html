@@ -13,6 +13,7 @@
     <div class="form-card">
       <div class="form-section-title">User Information</div>
       <form method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="row g-3">
           <div class="col-md-6">
             <label class="form-label">Full Name *</label>

@@ -155,6 +155,7 @@
           {% endwith %}
 
           <form method="POST" action="{{ url_for('auth.register') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
             <div class="section-divider">Personal Information</div>
             <div class="row g-3">
@@ -237,23 +238,13 @@
 </div>
 
 <script>
-// Pre-fill from booking form if available
-window.addEventListener('load', function() {
-  const name  = sessionStorage.getItem('bookingName');
-  const email = sessionStorage.getItem('bookingEmail');
-  if (name  && document.getElementById('nameInput'))  document.getElementById('nameInput').value  = name;
-  if (email && document.getElementById('emailInput')) document.getElementById('emailInput').value = email;
-});
-
-// Password match checker
 document.getElementById('pw2').addEventListener('input', function() {
-  const match = document.getElementById('pwMatch');
+  const m = document.getElementById('pwMatch');
   if (this.value === document.getElementById('pw1').value) {
-    match.innerHTML = '<span style="color:#2d6a4f;"><i class="bi bi-check-circle-fill me-1"></i>Passwords match</span>';
+    m.innerHTML = '<span style="color:#2d6a4f;"><i class="bi bi-check-circle-fill me-1"></i>Passwords match</span>';
   } else {
-    match.innerHTML = '<span style="color:#dc2626;"><i class="bi bi-x-circle-fill me-1"></i>Passwords do not match</span>';
+    m.innerHTML = '<span style="color:#dc2626;"><i class="bi bi-x-circle-fill me-1"></i>Do not match</span>';
   }
 });
 </script>
-
 {% endblock %}

@@ -131,6 +131,7 @@
       <div class="form-section-title text-success">Approve Clearance</div>
       <p class="small text-muted mb-3">Calculated fee: <strong class="text-forest">KES {{ '{:,.0f}'.format(clearance.calculate_fee()) }}</strong></p>
       <form method="POST" action="{{ url_for('admin.approve_clearance', clearance_id=clearance.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <textarea name="notes" class="form-control form-control-sm mb-3" rows="2"
                   placeholder="Optional approval notes..."></textarea>
         <button type="submit" class="btn btn-success w-100"
@@ -143,6 +144,7 @@
     <div class="form-card">
       <div class="form-section-title text-danger">Reject Clearance</div>
       <form method="POST" action="{{ url_for('admin.reject_clearance', clearance_id=clearance.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <textarea name="notes" class="form-control form-control-sm mb-3" rows="2"
                   placeholder="Reason for rejection (required)" required></textarea>
         <button type="submit" class="btn btn-danger w-100"

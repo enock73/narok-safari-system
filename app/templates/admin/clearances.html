@@ -99,6 +99,7 @@
               {% if c.status == 'pending' %}
               <form method="POST" action="{{ url_for('admin.approve_clearance', clearance_id=c.id) }}"
                     class="d-inline" onsubmit="return confirm('Approve clearance for {{ c.guide.full_name }}?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <button class="btn btn-sm btn-success py-0 px-2" title="Approve">
                   <i class="bi bi-check-lg"></i>
                 </button>

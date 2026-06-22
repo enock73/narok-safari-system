@@ -52,6 +52,7 @@
 </div>
 
 <form method="POST" action="{{ url_for('tourist.book_details') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
   <input type="hidden" name="guide_id"   value="{{ guide.id }}">
   <input type="hidden" name="vehicle_id" value="{{ vehicle.id }}">
 

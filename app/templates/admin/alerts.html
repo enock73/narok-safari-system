@@ -29,6 +29,7 @@
         </div>
       </div>
       <form method="POST" action="{{ url_for('admin.toggle_alert', alert_id=alert.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <button type="submit" class="btn btn-sm btn-{{ 'warning' if alert.is_active else 'outline-success' }}">
           {{ 'Deactivate' if alert.is_active else 'Activate' }}
         </button>
@@ -54,6 +55,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <form method="POST" action="{{ url_for('admin.alerts') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Alert Type</label>
